@@ -1,0 +1,52 @@
+
+# ---------------------------------------------------------------------------------------
+# MODELO ANOVA. 
+# Variable Categórica Rexión (Reg).
+# ---------------------------------------------------------------------------------------
+table(base$Reg)
+
+# ---------------------------------------------------------------------------------------
+# Comentarios:
+#  - Temos un total de 6 grupos (6 valores da variable categórica Reg), cun número maior
+#    a 10 observacións por grupo.
+# ---------------------------------------------------------------------------------------
+
+#  - Plantexamos o seguinte modelo ANOVA:
+# ---------------------------------------------------------------------------------------
+# log(NewHIV)= mu(Reg)_i + Erro
+# ---------------------------------------------------------------------------------------
+
+AnovaReg=factor(base$Reg)
+
+anova1 <- lm(log(base$NewHIV) ~ AnovaReg)
+summary(anova)
+n=length(AnovaReg)
+I=length(levels(AnovaReg))
+mu_local <- tapply(log(base$NewHIV), AnovaReg, mean)
+n_local <- tapply(log(base$NewHIV), AnovaReg, length) 
+
+plot(AnovaReg,log(base$NewHIV))
+ggplot(data.frame(AnovaReg,log(base$NewHIV)), aes(x = AnovaReg, y = log(base$NewHIV))) +
+  geom_jitter(width = 0.2, height = 0, alpha = 0.6) + # Añade un poco de dispersión en el eje x para que los puntos no se superpongan
+  labs(x = "Rexión", y = "Log(NewHIV)", title = "Diagrama de dispersión de log(NewHIV) por Rexión") +
+  theme_minimal()
+anova(anova1) #si
+
+# ---------------------------------------------------------------------------------------
+# MODELO ANOVA. 
+# Variable Categórica Relixión (Rel).
+# ---------------------------------------------------------------------------------------
+rel=base$Rel
+table(rel)
+rel=factor(rel)
+datarel=data.frame(rel,log(base$NewHIV))
+
+levels(datarel$rel)
+levels(datarel$rel)[levels(datarel$rel) %in% c("Buddhism", "Shinto / Buddhism")] <- "Buddhism"
+levels(datarel$rel)[levels(datarel$rel) %in% c("Christianity / Islam", "Christianity")] <- "Christianity"
+datarel=datarel[!(datarel$rel%in% c("Hinduism",  "None (51%)" ,"Judaism" )),]
+datarel$rel <- droplevels(datarel$rel )
+
+anovarel=lm(log(base$NewHIV) ~ Rel)
+summary(anovarel)
+table(base$Rel)
