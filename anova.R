@@ -1,203 +1,184 @@
-
-# ---------------------------------------------------------------------------------------
 # MODELO ANOVA. 
 # Variable categórica: rexión (Reg).
 
-#  - Temos un total de 6 grupos (6 valores da variable categórica Reg), cun número maior
-#    a 10 observacións por grupo.
-#  - Plantexamos o seguinte modelo ANOVA:
-# log(NewHIV)= mu(Reg_1) + alpha_i + Erro
+# - Temos un total de 6 grupos (6 valores da variable categórica Reg), cun número maior
+#   a 10 observacións por grupo.
+# - Plantexamos o seguinte modelo ANOVA:
+#   log(NewHIV)= mu(Reg_1) + alpha_i + Erro
 
 
 # Creamos un data frame cos datos de interese
 base <- na.omit(read.csv("BBDDHIV.csv",sep=";"))
 dataReg=data.frame(CouCod=base$CouCod,AnovaReg=factor(base$Reg),AnovaNew=log(base$NewHIV))
 
-
+# Representamos os datos
 par(mfrow=c(1,1))
-plot(dataReg$AnovaReg, dataReg$AnovaNew, main = "Identificación de Atípicos", 
+plot(dataReg$AnovaReg, dataReg$AnovaNew, main = "Identificación de atípicos", 
      xlab = "AnovaReg", ylab = "AnovaNew")
 
 ggplot(dataReg, aes(x = AnovaReg, y = AnovaNew)) +
-  geom_jitter(width = 0.2, height = 0, alpha = 0.6) + # Añade un poco de dispersión en el eje x para que los puntos no se superpongan
-  labs(x = "Rexión", y = "Log(NewHIV)", title = "Diagrama de dispersión de log(NewHIV) por Rexión") +
+  geom_jitter(width = 0.2, height = 0, alpha = 0.6) +
+  labs(x = "Rexión", y = "Log(NewHIV)", title = "Diagrama de dispersión de log(NewHIV) por rexión") +
   theme_minimal()
 
 library(ggplot2)
-library(dplyr) #paquete para manipular data.frames
+library(dplyr) # Paquete para manipular data frame
 
-#definimos a función que detecta atípicos
+# Definimos unha función que detecta atípicos
 atipico <- function(x) {
   return(x < quantile(x, .25) - 1.5*IQR(x) | x > quantile(x, .75) + 1.5*IQR(x))
 }
 
-# Orixinamos unha columna indicando cales son as observacións atípicas
+# Creamos unha columna indicando cales son as observacións atípicas
 dataReg <- dataReg %>%
   group_by(AnovaReg) %>%
   mutate(outlier = ifelse(atipico(AnovaNew), CouCod, NA))
+length(which(dataReg$outlier != "NA")) # 8 atípicos
  
-#gráfico ilustrativo e identificativo
+# Gráfico ilustrativo e identificativo
 ggplot(dataReg, aes(x = AnovaReg, y = AnovaNew, colour = AnovaReg, shape = AnovaReg)) + 
   geom_boxplot(outlier.shape = NA) +
   geom_jitter() +
   geom_text(aes(label=outlier), na.rm=TRUE, hjust=-.5)+
   theme(legend.position="none")
-#páxina de onde se sacou o código da idea
-#https://www.r-bloggers.com/2022/08/how-to-label-outliers-in-boxplots-in-ggplot2/
 
-#novo data.frame de datos
+# Páxina de onde se sacou o código da idea:
+# https://www.r-bloggers.com/2022/08/how-to-label-outliers-in-boxplots-in-ggplot2/
+
+# Definimos un novo data frame eliminando os atípicos
 dataReg2 <- dataReg %>% filter(is.na(outlier))
-#filtramos atípicos
+
+# Filtramos atípicos
 dataReg2 <- dataReg2 %>%
   group_by(AnovaReg) %>%
   mutate(outlier = ifelse(atipico(AnovaNew), CouCod, NA))
+length(which(dataReg2$outlier != "NA")) # 1 atípico
 
-#representamos os datos, vemos que volve a haber un atípico.
+# Representamos os datos
 ggplot(dataReg2, aes(x = AnovaReg, y = AnovaNew, colour = AnovaReg, shape = AnovaReg)) + 
   geom_boxplot(outlier.shape = NA) +
   geom_jitter() +
   geom_text(aes(label=outlier), na.rm=TRUE, hjust=-.5)+
   theme(legend.position="none")
 
-#definimos a nova base eliminado os atípicos
+# Definimos un novo data frame eliminando os atípicos
 dataReg3 <- dataReg2 %>% filter(is.na(outlier))
-#novos atípicos
+
+# Filtramos atípicos
 dataReg3 <- dataReg3 %>%
   group_by(AnovaReg) %>%
   mutate(outlier = ifelse(atipico(AnovaNew), CouCod, NA))
+length(which(dataReg3$outlier != "NA")) # 0 atípicos
 
-#representamos, vemos que non hai atípicos
+# Representamos os datos
 ggplot(dataReg3, aes(x = AnovaReg, y = AnovaNew, colour = AnovaReg, shape = AnovaReg)) + 
   geom_boxplot(outlier.shape = NA) +
   geom_jitter() +
   geom_text(aes(label=outlier), na.rm=TRUE, hjust=-.5)+
   theme(legend.position="none")
 
-#Podemos esquecernos dos data frames base, dataReg e dataReg2. Por claridade chamaremos dataAnova.
+
+# Centrarémonos unicamente no data frame dataReg3, que renomearemos dataAnova por claridade.
 dataAnova=dataReg3
 rm(dataReg,dataReg2,dataReg3)
-
 attach(dataAnova)
 
-
-#Definimos o modelo anova
+# Definimos o modelo anova
 modAnovaReg<- lm(AnovaNew ~ AnovaReg)
-#Visualizamos a información básica do modelo
+
+# Visualizamos a información básica do modelo
 summary(modAnovaReg)
 
+# - A media máis alta é a asociada ao primeiro grupo (África). Como R toma este grupo
+#   como grupo referencia, o resto dos estimadores son negativos, xa que representan as
+#   desviacións da media de cada grupo respecto á de África.
+# - Todas as medias son positivas.
+# - A maior parte dos estimadores son significativamente distintos de 0. O que parece ter máis
+#   problemas é o asociado a Asia pero segue tendo un valor crítico significativo (0.02372).
 
-#Comentarios: 
-# Todos as medias son positivas e a maior delas é asociada ao primeiro grupo (Africa)
-# por eso o resto de estimadores (das desviación respecto do grupo de referencia)
-# son negativas.
-# Nótese tamén que a meirande parte deles son significativamente distintos de cero.
-# A que semella ter máis problemas é a do grupo de Asia, que significativamente
-# non difire moito da de Africa (pero cualitativamente si).
 #Nótese que a estimación da desviación é de 2.075 (relacionada coa suma da varianza intragrupal)
 
-nReg=length(AnovaReg) #tamaño da mostra
-IReg=length(levels(AnovaReg)) #cantidade de grupos
-names=levels(AnovaReg) #os nomes dos grupos
-mu_localReg <- tapply(AnovaNew, AnovaReg, mean) #calculamos as medias locais
-n_localReg <- tapply(AnovaNew, AnovaReg, length) #calculamos o total de observacións por grupo
+# Test F aplicado ao modelo ANOVA
+anova(modAnovaReg) # 4.254e-08
+
+# - O p-valor é moi significativo, logo rexeitamos a hipótese nula de que todas as medias son
+#   iguais. Recordamos que co test F comparamos dous modelos: un modelo simplificado (o da
+#   hipótese nula) e o modelo complexo onde polo menos hai dúas medias diferentes (o da hipótese
+#   alternativa).
 
 
+# Validación
 
-#Test F aplicado ao modelo ANOVA
-anova(modAnovaReg) #si
-# Comprobamos que o p-valor é moi pequeno, polo tanto rexeitamos H0 (de que as medias son todas iguais)
-#Co test F comparamos dous modelos, na nula temos un modelo simplificado e na alternativa temos 
-# o modelo complexo, onde teeriamos que hai duas medias polo menos diferentes (entre elas)
+# Definimos unha serie de obxectos que usaremos nesta sección
+nReg=length(AnovaReg) # Tamaño da mostra
+IReg=length(levels(AnovaReg)) # Cantidade de grupos
+names=levels(AnovaReg) # Nomes dos grupos
+mu_localReg <- tapply(AnovaNew, AnovaReg, mean) # Medias locais
+n_localReg <- tapply(AnovaNew, AnovaReg, length) # Número total de observacións por grupo
 
-#Validación
-
-
-# Realizar la prueba de Shapiro-Wilk para cada grupo
-
+# Test Shapiro-Wilk para os residuos
 normalidad_residuos <- dataAnova %>%
   group_by(AnovaReg) %>%
-  mutate(residuo = AnovaNew - mu_localReg[AnovaReg] ) %>%# Calcular los residuos
+  mutate(residuo = AnovaNew - mu_localReg[AnovaReg] ) %>% # Calcular los residuos
   summarise(p_value = shapiro.test(residuo)$p.value, .groups = "drop")
-# Prueba de Shapiro-Wilk para los residuos
-
-# Ver resultados
 print(normalidad_residuos)
-#Observamos que a un nivel de 0.05 o grupo de Europa non segue a normalidade.
 
-#O total dos datos non segue unha distribución normal !!!!
+# - Observamos que a un nivel de 0.05 o grupo de Europa non cómpre
+# a hipótese de normalidade dos residuos.
+
+# Test de Shapiro-Wilk para os datos
 resultado_shapiro <- shapiro.test(dataAnova$AnovaNew)
+print(resultado_shapiro) # 0.01248
 
-# Ver los resultados
-print(resultado_shapiro)
-
-#Eliminamos o grupo de Europa
+# Eliminamos o grupo de Europa
 table(dataAnova$AnovaReg)
 dataAnova=dataAnova[!(dataAnova$AnovaReg%in% c("Europe" )),]
 dataAnova$AnovaReg <- droplevels(dataAnova$AnovaReg)
 table(dataAnova$AnovaReg)
 
-#Repetimos o modelo
+# Repetimos o modelo
 
-
-#gráfico ilustrativo e identificativo
+# Gráfico ilustrativo e identificativo
 ggplot(dataAnova, aes(x = AnovaReg, y = AnovaNew, colour = AnovaReg, shape = AnovaReg)) + 
   geom_boxplot(outlier.shape = NA) +
   geom_jitter() +
   geom_text(aes(label=outlier), na.rm=TRUE, hjust=-.5)+
   theme(legend.position="none")
 
-#Definimos o modelo anova
+# Definimos o modelo anova
 
 modAnovaReg2<- lm(dataAnova$AnovaNew ~ dataAnova$AnovaReg)
-#Visualizamos a información básica do modelo
+
+# Visualizamos a información básica do modelo
 summary(modAnovaReg2)
+
+# - As conclusións son practicamente idénticas ás do modelo anterior.
+
+# Test F aplicado ao modelo ANOVA
+anova(modAnovaReg2) # 0.0005975
+
+# - O p-valor segue a ser moi significativo, logo rexeitamos a hipótese nula de que todas
+# as medias son iguais.
+
+# Repetimos a validación do modelo
+
+# Definimos unha serie de obxectos que usaremos nesta sección
 attach(dataAnova)
+nReg=length(AnovaReg) # Tamaño da mostra
+IReg=length(levels(AnovaReg)) # Cantidade de grupos
+names=levels(AnovaReg) # Nomes dos grupos
+mu_localReg <- tapply(AnovaNew, AnovaReg, mean) # Medias locais
+n_localReg <- tapply(AnovaNew, AnovaReg, length) # Número total de observacións por grupo
 
-#Comentarios: 
-# Todos as medias son positivas e a maior delas é asociada ao primeiro grupo (Africa)
-# por eso o resto de estimadores (das desviación respecto do grupo de referencia)
-# son negativas.
-# Nótese tamén que a meirande parte deles son significativamente distintos de cero.
-# A que semella ter máis problemas é a do grupo de Asia, que significativamente
-# non difire moito da de Africa (pero cualitativamente si).
-#Nótese que a estimación da desviación é de 2.075 (relacionada coa suma da varianza intragrupal)
-
-nReg=length(AnovaReg) #tamaño da mostra
-IReg=length(levels(AnovaReg)) #cantidade de grupos
-names=levels(AnovaReg) #os nomes dos grupos
-mu_localReg <- tapply(AnovaNew, AnovaReg, mean) #calculamos as medias locais
-n_localReg <- tapply(AnovaNew, AnovaReg, length) #calculamos o total de observacións por grupo
-
-
-
-
-
-
-
-#Test F aplicado ao modelo ANOVA
-anova(modAnovaReg2) #si
-# Comprobamos que o p-valor bastante pequeno, polo tanto rexeitamos H0 (de que as medias son todas iguais)
-#Co test F comparamos dous modelos, na nula temos un modelo simplificado e na alternativa temos 
-# o modelo complexo, onde teeriamos que hai duas medias polo menos diferentes (entre elas)
-
-
-#Volvemos a validar
-#Validación
-
-
-# Realizar la prueba de Shapiro-Wilk para cada grupo
+# Test de Shapiro-Wilk para os residuos
 normalidad_residuos <- dataAnova %>%
   group_by(AnovaReg) %>%
   mutate(residuo = AnovaNew - mu_localReg[AnovaReg] ) %>%# Calcular los residuos
   summarise(p_value = shapiro.test(residuo)$p.value, .groups = "drop")
-# Ver resultados
 print(normalidad_residuos)
-#Observamos que a un nivel de 0.05 o grupo de Europa non segue a normalidade.
 
 #O total dos datos non segue unha distribución normal !!!!
 resultado_shapiro <- shapiro.test(dataAnova$AnovaNew)
-
-# Ver los resultados
 print(resultado_shapiro)
 
 
