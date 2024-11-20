@@ -560,7 +560,7 @@ par(mfrow = c(1,1))
 hist(cooks.distance(mod2))
 rug(cooks.distance(mod2))  
 
-# - Ningunha observación é influínte. 
+# - Ningunha observación é influínte. Polo tanto, non eliminaremos observacións.
 
 
 # Validación do modelo (Val.mod2)
@@ -606,11 +606,12 @@ hmctest(mod2) # 0.029
 # - Debido ao baixo nivel crítico non rexeitamos a hipótese de homocedasticidade do 
 #   modelo proposto. Debemos traballar cun nivel maior ao 7.6 %.
 
------------------------------------------------------ VAS POR AQUI
+
 # Linealidade (Lin.Val.mod2)
 
 # Test de Ramsey
 resettest(mod2) # 0.6715
+
 # - O nivel crítico é moi alto, logo rexeitamos a hipótese de linealidade do modelo.
 
 # Test de Harvey-Collier
@@ -647,241 +648,12 @@ VIF_2["logPreHIV"] <- 1/(1-(cor(log(PreHIV),fitted(lm(log(PreHIV)~log(Pop)))))^2
 VIF_2["logPop"] <- 1/(1-(cor(log(Pop),fitted(lm(log(Pop)~log(PreHIV)))))^2)
 VIF_2
 
-# Os VIF coinciden.
-
+# Os VIF coinciden:
 # logPreHIV   logPop 
 # 1.001115    1.001115 
 
 
-# O noso modelo final será o resultante tras a eliminación das oboservacións atípicas.
-
-# Eliminación de observacións atípicas
-posibles2=sort(indati2)
-base[posibles2,] # Analizamos cales son as posibles
-base2=base[-posibles2,]
-attach(base2)
-
-
-
-#Dende aquí son do modelo eliminando observacións, pero non fai falta facelo, valorar se eliminar ou deixar no script
-importante
-
-
-# Formulación do modelo
-mod3<-  lm(log(NewHIV) ~ log(PreHIV)  + log(Pop))
-
-# Análise do modelo (Ana.mod3)
-summary(mod3)
-
-# Estimadores dos parámetros do modelo (Est.mod3)
-beta_hat_3 <- coef(mod3)
-beta_hat_3
-
-# Os resultados da análise do modelo son moi similares aos dos anteriores modelos. Por este
-# motivo, nos centraremos na interpretación específica deste modelo.
-
-
-# Intervalos de confianza para os estimadores dos parámetros do modelo (Int.mod3)
-
-# Calculamos os intervalos de confianza en diferentes niveis
-confint_99_3 <- confint(mod3, level = 0.99)
-confint_95_3 <- confint(mod3, level = 0.95)
-confint_90_3 <- confint(mod3, level = 0.90)
-
-# Convertimos os intervalos a data frame y agregamos una columna de nivel de confianza
-confint_df_99_3 <- as.data.frame(confint_99_3)
-confint_df_99_3$confianza <- "99%"
-colnames(confint_df_99_3) <- c("lower", "upper", "Confianza")
-confint_df_95_3 <- as.data.frame(confint_95_3)
-confint_df_95_3$confianza <- "95%"
-colnames(confint_df_95_3) <- c("lower", "upper", "Confianza")
-confint_df_90_3 <- as.data.frame(confint_90_3)
-confint_df_90_3$confianza <- "90%"
-colnames(confint_df_90_3) <- c("lower", "upper", "Confianza")
-
-# Combinamos os data frame
-confint_df_3 <- rbind(confint_df_99_3, confint_df_95_3, confint_df_90_3)
-
-# Renomeamos as columnas para facilitar o uso en ggplot
-colnames(confint_df_3) <- c("lower", "upper", "Confianza")
-
-# Engadimos as columnas do parámetro estimado e o valor central (media)
-confint_df_3$parametro <- rownames(confint_99_3)
-confint_df_3$media <- (confint_df_3$lower + confint_df_3$upper) / 2
-
-# Creamos un gráfico con ggplot, que amose na mesma escala os intervalos
-ints <- ggplot(data=confint_df_3, aes(x=parametro, y=media, color=Confianza)) + 
-  geom_point() + geom_errorbar(aes(ymin=lower, ymax=upper), width=0.2) +
-  xlab("Parámetro") + ylab("Estimación do parámetro con intervalo de confianza") +
-  ggtitle("Intervalos de confianza para cada parámetro en diferentes niveis") +
-  theme_bw() + theme(axis.text.x = element_text(angle=45, vjust=0.5, size=10))
-ints
-
-# Creamos outro gráfico con ggplot, que amose en diferentes escalas os intervalos
-ints_escala <- ggplot(data=confint_df_3, aes(x=Confianza, y=media, color=Confianza)) + 
-  geom_point(size=3) + geom_errorbar(aes(ymin=lower, ymax=upper), width=0.2) +
-  xlab("Nivel de confianza") +  ylab("Estimación do parámetro con intervalo de confianza") +
-  ggtitle("Intervalos de confianza para todos os parámetros") + theme_bw() +
-  theme(axis.text.x = element_text(angle=45, vjust=0.5, size=10)) +
-  facet_wrap(~parametro,scales="free")  
-ints_escala
-
-# - Ningún dos intervalos contén ao cero.
-# - Os extremos dos parámetros asociados ás variables explicativas están entre 0.6 e 1.
-
-
-# Diagnose do modelo (Dia.mod3)
-
-# Observacións con capacidade de influencia (Cap.Dia.mod3)
-leverages3 <- hat(model.matrix(mod3)) # Diagonal da matriz hat
-n3 <- length(NewHIV)
-p3 <- 3
-indlev3 <- which(leverages3>= 2*p3/n3)
-length(indlev3) # 16
-
-# Representamos graficamente as observacións con capacidade de influencia nos
-# diagramas de dispersión de cada variable explicativa.
-par(mfrow = c(1,2))
-
-plot(log(NewHIV) ~ log(PreHIV), pch=19)
-points(log(NewHIV)[indlev3] ~ log(PreHIV)[indlev3], col=4, pch=16)
-text(log(PreHIV)[indlev3], log(NewHIV)[indlev3], labels=indlev3, pos=4, col=4, cex=0.8)
-
-plot(log(NewHIV) ~ log(Pop), pch=19)
-points(log(NewHIV)[indlev3] ~ log(Pop)[indlev3], col=4, pch=16)
-text(log(Pop)[indlev3], log(NewHIV)[indlev3], labels=indlev3, pos=4, col=4, cex=0.8)
-
-# - Hai 16 observacións con capacidade de influencia: 19, 32, 36, 46, 54, 65, 89, 102,
-#   106, 108, 132, 133, 134, 143, 167 e 168
-# - A gran maioría das observacións con capacidade de influencia atópanse nos extremos,
-#   o que mellora a situación dos modelos anteriores.
-
-
-# Observacións atípicas (Ati.Dia.mod3)
-
-# Residuos estandarizados o estudentizados
-which(abs(rstandard(mod3)) > 1.96)
-which(abs(rstudent(mod3)) > 1.96) 
-indati3 <- which(abs(rstandard(mod3)) > 1.96)
-length(indati3) # 9
-
-# Representamos graficamente as observacións atípicas nos diagramas de dispersión
-# de cada variable explicativa.
-par(mfrow = c(1,2))
-
-plot(log(NewHIV) ~ log(PreHIV), pch=19)
-points(log(NewHIV)[indati3] ~ log(PreHIV)[indati3], col=4, pch=16)
-text(log(PreHIV)[indati3], log(NewHIV)[indati3], labels=indati3, pos=4, col=4, cex=0.8)
-
-plot(log(NewHIV) ~ log(Pop), pch=19)
-points(log(NewHIV)[indati3] ~ log(Pop)[indati3], col=4, pch=16)
-text(log(Pop)[indati3], log(NewHIV)[indati3], labels=indati3, pos=4, col=4, cex=0.8)
-
-# - Hai 9 observacións atípicas: 8, 13, 56, 81, 122, 123, 132, 146 e 150.
-
-
-# Observacións influíntes (Inf.Dia.mod3)
-
-# Distancia de Cook
-cooks.distance(mod3)
-round(cooks.distance(mod3),3) 
-sort(cooks.distance(mod3)) 
-
-# A observación con maior distancia de Cook segue a ser a mesma dos modelos anteriores (a 137).
-
-# Influíntes
-qf3 <- qf(0.5, 2, n3-p3)
-which(cooks.distance(mod3) > qf3)
-
-# Graficamente
-par(mfrow = c(1,1))
-hist(cooks.distance(mod3))
-rug(cooks.distance(mod3))  
-
-# - Ningunha observación é influínte. 
-
-
-# Validación do modelo (Val.mod3)
-
-par(mfrow = c(2, 2))
-plot(mod3)
-
-#  1.	Residuals vs Fitted. Sinálanse as observacións 13, 81 e 146.
-#  2.	Scale-Location. Sinálanse as observacións 13, 81 e 146.
-#  3. Q-Q residuals. Sinálanse as observacións 13, 81 e 146.
-#  4.	Residuals vs Leverage. Sinálanse as observacións 36, 123, 132.
-
-
-# Normalidade (Nor.Val.mod3)
-
-# Test de Shapiro-Wilk
-shapiro.test(rstandard(mod3)) # 0.1663
-shapiro.test(rstudent(mod3)) # 0.1821
-
-# Rexeitamos a hipótese de normalidade.
-
-par(mfrow = c(1,2))
-#library(car)
-#library(carData)
-#library(lmtest)
-hist(rstandard(mod3),freq=F,main="Histograma") 
-qqPlot(rstandard(mod3),main="Q-Q plot")
-
-
-# Homocedasticidade (Hom.Val.mod3)
-
-# Test de Breusch-Pagan
-bptest(mod3) # 0.0923
-
-# - Aumenta o nivel crítico con respecto a mod2. Porén, non é o suficientemente alto para
-#  rexeitar a hipótese de homocedasticidade (tomando un nivel de confianza do 0.1).
-
-# Test de Harrison-McCabe
-hmctest(mod3) # 0.542
-
-# - Debido ao alto nivel crítico rexeitamos a hipótese de homocedasticidade do modelo.
-
-
-# Linealidade (Lin.Val.mod3)
-
-# Test de Ramsey
-resettest(mod3) # 0.0592
-
-# -Debido ao baixo nivel crítico, non rexeitamos a hipótese de linealidade.
-
-
-# Test de Harvey-Collier
-harvtest(mod3) # 0.0002619
-
-# -Debido ao baixo nivel crítico, non rexeitamos a hipótese de linealidade.
-
-
-# Test de sm.regression
-library(sm) 
-sm.regression(log(NewHIV),rstandard(mod3),model="linear")
-
-
-# Análise da colinealidade (Col.Dia.mod3)
-x <- cbind(log(NewHIV),log(PreHIV),log(Pop))
-colnames(x) <- c("log(NewHIV)","log(PreHIV)","log(Pop)")
-corr_matrix_3 <-round(cor(x),3)
-#install.packages("ggcorrplot")
-library(ggcorrplot)
-ggcorrplot(corr_matrix,hc.order=TRUE,type="lower",lab=TRUE)
-
-# Seguimos tendo alta colinealidade
-
-
-# Calculemos os factores de inflación da varianza
-VIF_3 <- c()
-VIF_3["logPreHIV"] <- 1/(1-(cor(log(PreHIV),fitted(lm(log(PreHIV)~log(Pop)))))^2)
-VIF_3["logPop"] <- 1/(1-(cor(log(Pop),fitted(lm(log(Pop)~log(PreHIV)))))^2)
-VIF_3
-
-
-# Podemos concluír que tras a eliminación de datos atípicos non se obteñen mellores
-# resultados no que se refire á linealidade. Máis aínda, ponse en dúbida a hipótese
-# de normalidade. Cómpre aclarar que estamos a supoñer unha independencia teórica 
+# Cómpre aclarar que no modelo estamos a supoñer unha independencia teórica 
 # entre as observacións que non ten por que ser completamente fiel á realidade.
 # En efecto, a natureza dos nosos datos é xeográfica, logo é imposible que non
 # exista certa dependencia entre as observacións. Non profundizaremos moito neste 
@@ -898,7 +670,7 @@ VIF_3
 # ---------------------------------------------------------------------------------------
 # ---------------------------------------------------------------------------------------
 
-X <- model.matrix(mod3)
+X <- model.matrix(mod2)
 n <- nrow(X)
 p <- ncol(X)
 XtXi <- solve(t(X)%*%X)
