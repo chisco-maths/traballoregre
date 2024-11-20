@@ -7,13 +7,27 @@
 ###--------#--------#----------CHENLO--ANDRADE--NICOLÁS----------#--------#--------###
 ###--------#--------#---------ESTÉVEZ--LENGUA--FRANCISCO---------#--------#--------###
 
-# Cargamos en R a base de datos eliminando as observacións incompletas.
+# Instalamos diversos paquetes de representación gráfica
+install.packages("gridExtra")
+install.packages("ggcorrplot")
+install.packages("ggplot2")
+
+# Cargamos librarías
+library(ggplot2)
+library(gridExtra)
+library(carData)
+library(car)
+library(lmtest)
+library(sm) 
+library(ggcorrplot)
+library(dplyr) # Manipulación de data frame
+
+# Cargamos a base de datos eliminando as observacións incompletas.
 base <- na.omit(read.csv("BBDDHIV.csv",sep=";"))
 head(base)
 attach(base)
 
-# Recollemos na seguinte táboa a explicación das variables:
-
+# Explicamos as variables na seguinte táboa
 # Nome       Descrición                                                   Tipo 
 # ---------------------------------------------------------------------------------------
 # RegCod <-  Código da rexión                                             Categórica
@@ -47,11 +61,9 @@ attach(base)
 # X3 <- Pop     (explicativa)
 
 
-# Diagramas de dispersión da variable resposta sobre as variables explicativas (Disp1)
-library(ggplot2)
-#install.packages("gridExtra")
-library(gridExtra)
+# Representación de datos
 
+# Diagramas de dispersión da variable resposta sobre as variables explicativas (Disp1)
 plot1 <- ggplot(data.frame(PreHIV,NewHIV), aes(x = PreHIV, y = NewHIV)) + 
   geom_point(color = "blue") + theme_minimal()
 
@@ -71,7 +83,6 @@ grid.arrange(plot1, plot2, plot3, nrow = 1,
 #   2. Debido as escalas poboacionais preséntase unha gran variabilidade nos datos.
 # - Debido á forma de "cono" dos diagramas conxeturamos que o modelo lineal múltiple
 #   proposto non vai verificar a hipótese de homocedasticidade.
-
 
 # Diagramas de dispersión entre as variables explicativas (Disp2)
 plot4 <- ggplot(data.frame(TotHIV,PreHIV), aes(x = TotHIV, y = PreHIV)) + 
@@ -97,8 +108,9 @@ grid.arrange(plot4, plot5, plot6, nrow = 1, top="Dispersion entre as variables e
 #  X2  log(TotHIV)  explicativa
 #  X3  log(Pop)     explicativa
 
+# Representación de datos
 
-#  Diagramas de dispersión da resposta sobre as explicativas (logarítmicas) (Disp3)
+# Diagramas de dispersión da resposta sobre as explicativas (logarítmicas) (Disp3)
 plotlog1 <- ggplot(data.frame(log(PreHIV),log(NewHIV)), aes(x = log(PreHIV), 
   y = log(NewHIV))) + geom_point(color = "cadetblue1") + theme_minimal()
 
@@ -117,8 +129,7 @@ grid.arrange(plotlog1, plotlog2, plotlog3, nrow = 1,
 # - Nos diagramas plotlog2 e plotlog3 observamos linealidade con relación de 
 #   dependencia directa. Non se observa demasiada variabilidade.
 
-
-#  Diagramas de dispersión entre as variables explicativas (Disp4)
+# Diagramas de dispersión entre as variables explicativas (Disp4)
 plotlog4 <- ggplot(data.frame(log(PreHIV),log(TotHIV)), aes(x = log(PreHIV), 
   y = log(TotHIV))) + geom_point(color = "gold2") + theme_minimal()
 
@@ -301,26 +312,25 @@ rug(cooks.distance(mod1))
 par(mfrow = c(2, 2))
 plot(mod1)
 
-#   1. Residuals vs Fitted. Este gráfico representa os residuos fronte aos valores axustados.
-#   É útil para identificar patróns nos residuos. Se o modelo é adecuado espérase que os
-#   residuos estean distribuídos aleatoriamente arredor de 0 sen patróns evidentes, que é
-#   o caso. Non se observan residuos que produzan efecto panca. Sinálanse as observacións
-#   115, 150 e 166.
-#  2.	Scale-Location. Este gráfico representa a raíz cadrada dos residuos estandarizados
-#   fronte os valores axustados. Permite avaliar se a variabilidade dos residuos é constante. 
-#   A hipótese de homocedasticidade non se ve moi comprometida: visualmente,
-#   a liña horizontal é relativamente uniforme, sen ten tendencias claras.
-#   Sinálanse as observacións 115, 150 e 166.
-#  3.	Q-Q Residuals. Este gráfico mostra a distribución dos residuos estandarizados en
-#   comparación cunha distribución normal. Serve para verificar se os residuos verifican
-#   normalidade. Observamos que os valores máis próximos aos extremos están máis
-#   alonxados do comportamento esperado dunha distribución normal. Sinálanse as 
-#   observacións 115, 150 e 166.
-#  4.	Residuals vs Leverage. Este gráfico axuda a identificar observacións influíntes
-#   con alto leverage, é dicir, aquelas observacións que poden tener un impacto
-#   significativo nos resultados do modelo. Os puntos influíntes poden detectarse
-#   empregando a distancia de Cook. Sinálanse as observacións 107, 137 e 166.
-
+# 1. Residuals vs Fitted. Este gráfico representa os residuos fronte aos valores axustados.
+#    É útil para identificar patróns nos residuos. Se o modelo é adecuado espérase que os
+#    residuos estean distribuídos aleatoriamente arredor de 0 sen patróns evidentes, que é
+#    o caso. Non se observan residuos que produzan efecto panca. Sinálanse as observacións
+#    115, 150 e 166.
+# 2. Scale-Location. Este gráfico representa a raíz cadrada dos residuos estandarizados
+#    fronte os valores axustados. Permite avaliar se a variabilidade dos residuos é constante. 
+#    A hipótese de homocedasticidade non se ve moi comprometida: visualmente,
+#    a liña horizontal é relativamente uniforme, sen ten tendencias claras.
+#    Sinálanse as observacións 115, 150 e 166.
+# 3. Q-Q Residuals. Este gráfico mostra a distribución dos residuos estandarizados en
+#    comparación cunha distribución normal. Serve para verificar se os residuos verifican
+#    normalidade. Observamos que os valores máis próximos aos extremos están máis
+#    alonxados do comportamento esperado dunha distribución normal. Sinálanse as 
+#    observacións 115, 150 e 166.
+# 4. Residuals vs Leverage. Este gráfico axuda a identificar observacións influíntes
+#    con alto leverage, é dicir, aquelas observacións que poden tener un impacto
+#    significativo nos resultados do modelo. Os puntos influíntes poden detectarse
+#    empregando a distancia de Cook. Sinálanse as observacións 107, 137 e 166.
 
 # Normalidade
 
@@ -330,13 +340,10 @@ shapiro.test(rstudent(mod1)) # 0.000274
 
 # Debido ao baixo nivel crítico podemos non rexeitar a normalidade do modelo proposto.
 
+# Representación gráfica
 par(mfrow = c(1,2))
-library(carData)
-library(car)
-library(lmtest)
 hist(rstandard(mod1),freq=F,main="Histograma") 
 qqPlot(rstandard(mod1),main="Q-Q Plot")
-
 
 # Homocedasticidade (Hom.Val.Mod1)
 
@@ -351,7 +358,6 @@ hmctest(mod1)
 
 # Debido ao baixo nivel crítico non rexeitamos a hipótese de homocedasticidade
 # do modelo proposto. Debemos traballar cun nivel maior ao 7.6 %.
-
 
 # Linealidade (Lin.Val.Mod1)
 
@@ -368,19 +374,14 @@ harvtest(mod1)
 # de que o modelo proposto é lineal (é coherente co resultado anterior).
 # Segundo este test estamos aceptando que segue un comportamento convexo ou cóncavo.
 
- 
 # Test de sm.regression
-library(sm) 
 sm.regression(log(NewHIV),rstandard(mod1),model="linear")
-
 
 # Análise da colinealidade (Col.Dia.Mod1)
 
 x <- cbind(log(NewHIV),log(PreHIV),log(TotHIV),log(Pop))
 colnames(x) <- c("log(NewHIV)","log(PreHIV)","log(TotHIV)","log(Pop)")
 corr_matrix <-round(cor(x),3)
-#install.packages("ggcorrplot")
-library(ggcorrplot)
 ggcorrplot(corr_matrix,hc.order=TRUE,type="lower",lab=TRUE) # Corr1
 
 # Observamos correlacións moi altas entre certas variables.
@@ -391,7 +392,6 @@ VIF["log(PreHIV)"] <- 1/(1-(cor(log(PreHIV),fitted(lm(log(PreHIV)~log(TotHIV)+lo
 VIF["log(TotHIV)"] <- 1/(1-(cor(log(TotHIV),fitted(lm(log(TotHIV)~log(PreHIV)+log(Pop)))))^2)
 VIF["log(Pop)"] <- 1/(1-(cor(log(Pop),fitted(lm(log(Pop)~log(TotHIV)+log(PreHIV)))))^2)
 VIF
-
 # log(PreHIV)   log(TotHIV)   log(Pop) 
 # 5.192242      12.266579     7.722377 
 
@@ -520,7 +520,6 @@ text(log(Pop)[indlev2], log(NewHIV)[indlev2], labels=indlev2, pos=4, col=4, cex=
 #   107, 111, 113, 137, 140, 141, 151, 178 e 179.
 # - Non todas as observacións con capacidade de influencia se atopan nos extremos.
 
-
 # Observacións atípicas (Ati.Dia.mod2)
 
 # Residuos estandarizados o estudentizados
@@ -542,7 +541,6 @@ points(log(NewHIV)[indati2] ~ log(Pop)[indati2], col=4, pch=16)
 text(log(Pop)[indati2], log(NewHIV)[indati2], labels=indati2, pos=4, col=4, cex=0.8)
 
 # - Hai 11: observacións atípicas: 11, 75, 84, 87, 101, 115, 137, 150, 159, 164 e 166.
-
 
 # Observacións influíntes (Inf.Dia.mod2)
 
@@ -570,13 +568,12 @@ rug(cooks.distance(mod2))
 par(mfrow = c(2, 2))
 plot(mod2)
 
-#  1.	Residuals vs Fitted. Sinálanse as observacións 137, 150 e 166.
-#  2.	Scale-Location. Sinálanse as observacións 137, 150 e 166.
-#  3.	Q-Q residuals. Sinálanse as observacións 137, 150 e 166. Coma no mod1, as colas
-#     dispérsanse un pouco do comportamento esperado dunha distribución normal.
-#  4.	Residuals vs Leverage. Como xa viramos, non se observan observacións influíntes.
-#     Sinálanse as observacións 75, 137, e 150
-
+# 1. Residuals vs Fitted. Sinálanse as observacións 137, 150 e 166.
+# 2. Scale-Location. Sinálanse as observacións 137, 150 e 166.
+# 3. Q-Q residuals. Sinálanse as observacións 137, 150 e 166. Coma no mod1, as colas
+#    dispérsanse un pouco do comportamento esperado dunha distribución normal.
+# 4. Residuals vs Leverage. Como xa viramos, non se observan observacións influíntes.
+#    Sinálanse as observacións 75, 137, e 150
 
 # Normalidade (Nor.Val.mod2)
 
@@ -587,12 +584,8 @@ shapiro.test(rstudent(mod2)) # 0.003103
 # - Debido ao baixo nivel crítico podemos non rexeitar a normalidade do modelo proposto.
 
 par(mfrow = c(1,2))
-#library(car)
-#library(carData)
-#library(lmtest)
 hist(rstandard(mod2),freq=F,main="Histograma") 
 qqPlot(rstandard(mod2),main="Q-Q plot")
-
 
 # Homocedasticidade (Hom.Val.mod2)
 
@@ -608,7 +601,6 @@ hmctest(mod2) # 0.029
 # - Debido ao baixo nivel crítico non rexeitamos a hipótese de homocedasticidade do 
 #   modelo proposto. Debemos traballar cun nivel maior ao 7.6 %.
 
-
 # Linealidade (Lin.Val.mod2)
 
 # Test de Ramsey
@@ -621,21 +613,16 @@ harvtest(mod2) # 0.0003043
 
 # - Como o nivel crítico é moi baixo, non rexeitamos a hipótese de linealidade no modelo.
 
-
 # Test de sm.regression
-library(sm) 
 sm.regression(log(NewHIV),rstandard(mod2),model="linear")
 
 # - Observamos que o estimador non paramétrico da regresión enmárcase dentro da rexión de
 #   confianza, logo non rexeitaremos a hipótese de linealidade.
 
-
 # Análise da colinealidade (Col.Dia.mod2)
 x <- cbind(log(NewHIV),log(PreHIV),log(Pop))
 colnames(x) <- c("log(NewHIV)","log(PreHIV)","log(Pop)")
 corr_matrix <-round(cor(x),3)
-#install.packages("ggcorrplot")
-library(ggcorrplot)
 ggcorrplot(corr_matrix,hc.order=TRUE,type="lower",lab=TRUE)
 
 # -A correlación entre as explicativas é moi baixa, logo eliminamos o problema
@@ -643,17 +630,16 @@ ggcorrplot(corr_matrix,hc.order=TRUE,type="lower",lab=TRUE)
 # -Un 80 % da variable resposta pode ser explicada pola variable log(Pop).
 # -Un 50 % da variable resposta pode ser explicada pola variable log(PreHIV).
 
-
 # Factores de inflación da varianza
 VIF_2 <- c()
 VIF_2["logPreHIV"] <- 1/(1-(cor(log(PreHIV),fitted(lm(log(PreHIV)~log(Pop)))))^2)
 VIF_2["logPop"] <- 1/(1-(cor(log(Pop),fitted(lm(log(Pop)~log(PreHIV)))))^2)
 VIF_2
-
-# Os VIF coinciden:
 # logPreHIV   logPop 
 # 1.001115    1.001115 
 
+# - Os VIF coinciden cos do modelo anterior.
+ 
 
 # Cómpre aclarar que no modelo estamos a supoñer unha independencia teórica 
 # entre as observacións que non ten por que ser completamente fiel á realidade.
@@ -694,9 +680,6 @@ ggplot(dataReg, aes(x = AnovaReg, y = AnovaNew)) +
   geom_jitter(width = 0.2, height = 0, alpha = 0.6) +
   labs(x = "Rexión", y = "Log(NewHIV)", title = "Diagrama de dispersión de log(NewHIV) por rexión") +
   theme_minimal()
-
-library(ggplot2)
-library(dplyr) # Paquete para manipular data frame
 
 # Definimos unha función que detecta atípicos
 atipico <- function(x) {
@@ -770,8 +753,6 @@ summary(modAnovaReg)
 # - A maior parte dos estimadores son significativamente distintos de 0. O que parece ter máis
 #   problemas é o asociado a Asia pero segue tendo un p-valor significativo (0.02372).
 
-#Nótese que a estimación da desviación é de 2.075 (relacionada coa suma da varianza intragrupal)
-
 # Test F aplicado ao modelo ANOVA
 anova(modAnovaReg) # 4.254e-08
 
@@ -798,7 +779,7 @@ normalidad_residuos <- dataAnova %>%
 print(normalidad_residuos)
 
 # - Observamos que a un nivel de 0.05 o grupo de Europa non cómpre
-#   a hipótese de normalidade dos residuos.
+# a hipótese de normalidade dos residuos.
 
 # Test de Shapiro-Wilk para os datos
 resultado_shapiro <- shapiro.test(dataAnova$AnovaNew)
@@ -831,8 +812,7 @@ summary(modAnovaReg2)
 # Test F aplicado ao modelo ANOVA
 anova(modAnovaReg2) # 0.0005975
 
-# - O p-valor segue a ser moi significativo, logo rexeitamos a hipótese nula de que todas
-# as medias son iguais.
+# - O p-valor segue a ser moi significativo, logo mantemos o rexeitamento da hipótese nula.
 
 # Repetimos a validación do modelo
 
@@ -856,13 +836,11 @@ resultado_shapiro <- shapiro.test(dataAnova$AnovaNew)
 print(resultado_shapiro)
 
 
-library(ggplot2)
 ggplot( data.frame(resid = residuals(modAnovaReg2)), aes(sample = resid)) +
   stat_qq() +
   stat_qq_line()
 
-
-leveneTest(AnovaNew ~ AnovaReg, data = dataAnova)
+leveneTest(AnovaNew ~ AnovaReg, data = dataAnova) # 0.01208
 
 #Valor p: 0.01208. Este valor es menor que 0.05, lo que sugiere que rechazas la 
 #hipótesis nula de que las varianzas son homogéneas entre los grupos.	
@@ -901,8 +879,6 @@ for (i in 1:IReg){
 }
 
 # Representación dos intervalos de confianza
-#install.packages("ggplot2")
-library(ggplot2)
 rownames(Bonferroni)=ww
 ggplot(Bonferroni, aes(y = rownames(Bonferroni), x = center,xmax=max(right)+1)) +
   geom_point(aes(color = "gold4"), size = 3) +  # Puntos azuis
