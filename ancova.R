@@ -88,7 +88,16 @@ ggplot(data.Ancova, aes(x = AncovaPop, y = AncovaNew, colour = AncovaReg,shape=A
 
 # Estimadores dos parámetros do modelo
 coeffancovaB2 <- coef(modAncovaRegB2); coeffancovaB2
-# Coeficientes para cada grupo
+# interpretación dos parámetros
+
+#Intervalos de confianza para os parámetros
+confint(modAncovaRegB2)
+
+#Contrastes de significación dos parámetros
+
+#Varianza do modelo
+
+
 
 ggplot(data.Ancova, aes(x = AncovaPop, y = AncovaNew, colour = AncovaReg,shape=AncovaReg)) +
   geom_point(shape=AncovaReg) +  # Puntos reales
@@ -127,10 +136,35 @@ modsencategorica <-lm(AncovaNew~AncovaPop)
 anova(modsencategorica,modAncovaRegB2) #2.2e-16 logo hai un efecto da variable categorica
 #Estamos a comparar un modelo ancova cun modelo lineal simple (sen categorica)
 
+#Diagnose
+plot(modAncovaRegB2) #Non hai influintes, non quitamos ningun.
 
-plot(modAncovaRegB2) #Non hai influintes, non quitamos ningun
+
+
+# Interp
+
+
+#Validación
+#Residuos do modelo
+resAncova <-  residuals(modAncovaRegB2)
+
+shapiro.test(resAncova)
+
+
+
+res.df <- data.frame(resAncova=resAncova,Reg=AncovaReg)
+head(res.df)
+
+#Normalidade por grupos
+normalidad.df=data.frame(Reg=c(),p.value=c())
+for (i in  levels(res.df$Reg)) {
+  normalidad.df[i,1] <- i
+  normalidad.df[i,2] <-shapiro.test(res.df[res.df$Reg == i, ]$resAncova)$p.value
+}
+
 
 #Interpretación do modelo final...
 
-#Validación
+
+
 
