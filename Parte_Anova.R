@@ -18,7 +18,7 @@
 #Creamos un data.frame cos datos de interese
 base <- na.omit(read.csv("BBDDHIV.csv",sep=";"))
 dataReg=data.frame(CouCod=base$CouCod,AnovaReg=factor(base$Reg),AnovaNew=log(base$NewHIV))
-
+par(mfrow=c(1,1))
 plot(dataReg$AnovaReg, dataReg$AnovaNew, main = "Identificación de Atípicos", 
      xlab = "AnovaReg", ylab = "AnovaNew")
 
@@ -204,11 +204,6 @@ resultado_shapiro <- shapiro.test(dataAnova$AnovaNew)
 # Ver los resultados
 print(resultado_shapiro)
 
-#Eliminamos o grupo de Europa
-table(dataAnova$AnovaReg)
-dataAnova=dataAnova[!(dataAnova$AnovaReg%in% c("Europe" )),]
-dataAnova$AnovaReg <- droplevels(dataAnova$AnovaReg)
-table(dataAnova$AnovaReg)
 
 library(ggplot2)
 ggplot( data.frame(resid = residuals(modAnovaReg2)), aes(sample = resid)) +
