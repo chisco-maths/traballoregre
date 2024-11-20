@@ -570,12 +570,16 @@ plot(mod2)
 # 2. Scale-Location. Sinálanse as observacións 137, 150 e 166.
 # 3. Q-Q residuals. Sinálanse as observacións 137, 150 e 166. Coma no mod1, as colas
 #    dispérsanse un pouco do comportamento esperado dunha distribución normal.
+# -  Observamos que preto do (0,0) os datos alónxanse da banda de confianza para o QQplot
+#    igual ca no modelo anterior, nótese que agora maís se alonxan da orixe.
 # 4. Residuals vs Leverage. Como xa viramos, non se observan observacións influíntes.
 #    Sinálanse as observacións 75, 137, e 150
+ 
 
 # Normalidade (Nor.Val.mod2)
 
 # Test de Shapiro-Wilk
+shapiro.test(residuals(mod2)) # 0.006246
 shapiro.test(rstandard(mod2)) # 0.006058
 shapiro.test(rstudent(mod2)) # 0.003103
 # - Debido ao baixo nivel crítico debemos rexeitar a normalidade do modelo proposto.
