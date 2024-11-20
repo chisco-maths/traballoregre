@@ -7,6 +7,11 @@
 ###--------#--------#----------CHENLO--ANDRADE--NICOLÁS----------#--------#--------###
 ###--------#--------#---------ESTÉVEZ--LENGUA--FRANCISCO---------#--------#--------###
 
+### Modelos de Regresión e Análise Multivariante
+### Tarefa de evaluación continua
+### Chenlo Andrade, Nicolás
+### Estévez Lengua, Francisco
+
 # Instalamos diversos paquetes de representación gráfica
 install.packages("gridExtra")
 install.packages("ggcorrplot")
@@ -22,12 +27,12 @@ library(sm)
 library(ggcorrplot)
 library(dplyr) # Manipulación de data frame
 
-# Cargamos a base de datos eliminando as observacións incompletas.
+# Cargamos a base de datos eliminando as observacións incompletas
 base <- na.omit(read.csv("BBDDHIV.csv",sep=";"))
 head(base)
 attach(base)
 
-# Explicamos as variables na seguinte táboa
+# Explicamos as variables na seguinte táboa:
 # Nome       Descrición                                                   Tipo 
 # ---------------------------------------------------------------------------------------
 # RegCod <-  Código da rexión                                             Categórica
@@ -338,7 +343,7 @@ plot(mod1)
 shapiro.test(rstandard(mod1)) # 0.0008011
 shapiro.test(rstudent(mod1)) # 0.000274
 
-# Debido ao baixo nivel crítico podemos non rexeitar a normalidade do modelo proposto.
+# - Debido ao baixo nivel crítico podemos non rexeitar a normalidade do modelo proposto.
 
 # Representación gráfica
 par(mfrow = c(1,2))
@@ -350,29 +355,29 @@ qqPlot(rstandard(mod1),main="Q-Q Plot")
 # Test de Breusch-Pagan
 bptest(mod1) # 0.07627
 
-# Debido ao relativamente baixo nivel crítico podemos non rexeitar a hipótese de
-# homocedasticidade do modelo proposto.
+# - Debido ao relativamente baixo nivel crítico podemos non rexeitar a hipótese de
+#   homocedasticidade do modelo proposto.
 
 # Test de Harrison-McCabe
 hmctest(mod1)
 
-# Debido ao baixo nivel crítico non rexeitamos a hipótese de homocedasticidade
-# do modelo proposto. Debemos traballar cun nivel maior ao 7.6 %.
+# - Debido ao baixo nivel crítico non rexeitamos a hipótese de homocedasticidade
+#   do modelo proposto. Debemos traballar cun nivel maior ao 7.6 %.
 
 # Linealidade (Lin.Val.Mod1)
 
 # Test de Ramsey
 resettest(mod1)
 
-# O nivel crítico é alto (0.3018), logo rexeitamos a hipótese de linealidade do modelo.
-# Segundo este contraste pode ser mellor un polinomio de grao 2 ou 3.
+# - O nivel crítico é alto (0.3018), logo rexeitamos a hipótese de linealidade do modelo.
+#   Segundo este contraste pode ser mellor un polinomio de grao 2 ou 3.
 
 # Test de Harvey-Collier
 harvtest(mod1)
 
-# O nivel crítico é alto (0.5636), o que nos leva a rexeitar a hipótese nula 
-# de que o modelo proposto é lineal (é coherente co resultado anterior).
-# Segundo este test estamos aceptando que segue un comportamento convexo ou cóncavo.
+# - O nivel crítico é alto (0.5636), o que nos leva a rexeitar a hipótese nula 
+#   de que o modelo proposto é lineal (é coherente co resultado anterior).
+#   Segundo este test estamos aceptando que segue un comportamento convexo ou cóncavo.
 
 # Test de sm.regression
 sm.regression(log(NewHIV),rstandard(mod1),model="linear")
@@ -395,7 +400,7 @@ VIF
 # log(PreHIV)   log(TotHIV)   log(Pop) 
 # 5.192242      12.266579     7.722377 
 
-# Todos os factores de inflación son superiores a 5.
+# - Todos os factores de inflación son superiores a 5.
 
 
 # Conclusións:
@@ -411,10 +416,10 @@ VIF
 
 step(mod1)
 
-# Notamos que a función step non elimina ningunha variable do modelo. Porén, pola
-# propia definición das variables, sabemos que teoricamente PreHIV = TotHIV / Pop,
-# logo log(PreHIV) = log(TotHIV) - log(Pop). Deste xeito, veremos se ao eliminar a
-# variable log(TotHIV) solucionamos o problema de colinealidade.
+# - A función step non elimina ningunha variable do modelo. Porén, pola
+#   propia definición das variables, sabemos que teoricamente PreHIV = TotHIV / Pop,
+#   logo log(PreHIV) = log(TotHIV) - log(Pop). Deste xeito, veremos se ao eliminar a
+#   variable log(TotHIV) solucionamos o problema de colinealidade.
 
 
 # Formulación do modelo tras a eliminación da variable explicativa log(TotHIV) (mod2)
@@ -549,7 +554,7 @@ cooks.distance(mod2)
 round(cooks.distance(mod2),3) 
 sort(cooks.distance(mod2)) 
 
-# A observación con maior distancia de Cook segue a ser a mesma do mod1 (a 137).
+# - A observación con maior distancia de Cook segue a ser a mesma do mod1 (a 137).
 
 # Influíntes
 qf2 <- qf(0.5, 2, n2-p2)
@@ -625,10 +630,10 @@ colnames(x) <- c("log(NewHIV)","log(PreHIV)","log(Pop)")
 corr_matrix <-round(cor(x),3)
 ggcorrplot(corr_matrix,hc.order=TRUE,type="lower",lab=TRUE)
 
-# -A correlación entre as explicativas é moi baixa, logo eliminamos o problema
+# - A correlación entre as explicativas é moi baixa, logo eliminamos o problema
 #  de colinealidade. 
-# -Un 80 % da variable resposta pode ser explicada pola variable log(Pop).
-# -Un 50 % da variable resposta pode ser explicada pola variable log(PreHIV).
+# - Un 80 % da variable resposta pode ser explicada pola variable log(Pop).
+# - Un 50 % da variable resposta pode ser explicada pola variable log(PreHIV).
 
 # Factores de inflación da varianza
 VIF_2 <- c()
@@ -779,7 +784,7 @@ normalidad_residuos <- dataAnova %>%
 print(normalidad_residuos)
 
 # - Observamos que a un nivel de 0.05 o grupo de Europa non cómpre
-# a hipótese de normalidade dos residuos.
+#   a hipótese de normalidade dos residuos.
 
 # Test de Shapiro-Wilk para os datos
 resultado_shapiro <- shapiro.test(dataAnova$AnovaNew)
