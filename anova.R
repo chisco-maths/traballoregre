@@ -196,21 +196,17 @@ leveneTest(AnovaNew ~ AnovaReg, data = dataAnova)
 #lo que indica una violación del supuesto de homogeneidad de varianzas.
 
 
+# Comparacións múltiples
 
+# Método de Bonferroni
 
-##Comparacións múltiples
-#Bonferroni
-
-#install.packages("ggplot2")
-library(ggplot2)
-
+# Cálculo dos intervalos de confianza
 ni=n_localReg
 bar.y=mean(AnovaNew)
 bar.yi=mu_localReg
 sumres <- sum((AnovaNew - unlist(bar.yi[AnovaReg]))^2)
 dt2.bar=sumres/(nReg-IReg)
 dt.bar=sqrt(dt2.bar)
-
 k=IReg*(IReg-1)/2
 alpha=0.95
 qtb=qt(1-alpha/(2*k),nReg-IReg)
@@ -229,25 +225,29 @@ for (i in 1:IReg){
     }
   }
 }
-rownames(Bonferroni)=ww
 
+# Representación dos intervalos de confianza
+#install.packages("ggplot2")
+library(ggplot2)
+rownames(Bonferroni)=ww
 ggplot(Bonferroni, aes(y = rownames(Bonferroni), x = center,xmax=max(right)+1)) +
-  geom_point(aes(color = "gold4"), size = 3) +  # Puntos azules
+  geom_point(aes(color = "gold4"), size = 3) +  # Puntos azuis
   geom_segment(aes(x = left, xend = right, y = rownames(Bonferroni), color = "slateblue"), size = 1) +  # Barras de intervalo suaves
-  geom_point(aes(x = left), shape = 21, size = 3, fill = "white", color = "slateblue2") +  # Puntos al final izquierdo
-  geom_point(aes(x = right), shape = 21, size = 3, fill = "white", color = "slateblue2") +  # Puntos al final derecho
+  geom_point(aes(x = left), shape = 21, size = 3, fill = "white", color = "slateblue2") +  # Puntos extremo esquerdo
+  geom_point(aes(x = right), shape = 21, size = 3, fill = "white", color = "slateblue2") +  # Puntos extremo dereito
   geom_text(aes(x = max(right) + 0.5, label = round(p.value,3)), hjust = 0, vjust = 0, size = 3) +  # Texto con p.adjust
   labs(
-    title = "Intervalos de Confianza Axustados por Bonferroni",
+    title = "Intervalos de confianza axustados por Bonferroni",
     x = "Estimación", 
     y = "Comparacións"
   ) +
   geom_vline(xintercept = 0, color = "black", linetype = "dashed", size = 0.15) +
   theme_minimal() +
-  theme(legend.position = "none" )  # Ajustamos las etiquetas del eje y y eliminamos la leyenda
+  theme(legend.position = "none" )  # Axustamos as etiquetas do eixo e eliminamos a lenda
 
-##Comparacións múltiples
-#Tukey
+# Método de Tukey
+
+# Cálculo dos intervalos de confianza
 TukeyHSD(aov(modAnovaReg))
 qtt=qtukey(1-alpha,IReg,nReg-IReg)
 Tukey=data.frame(center=rep(0,k),left=rep(0,k),right=rep(0,k),p.adjust=rep(0,k))
@@ -265,26 +265,23 @@ for (i in 1:IReg){
     }
   }
 }
+
+# Representación dos intervalos de confianza
 rownames(Tukey)=ww
-
-
 ggplot(Tukey, aes(y = rownames(Tukey), x = center,xmax=max(right)+1)) +
-  geom_point(aes(color = "gold4"), size = 3) +  # Puntos azules
+  geom_point(aes(color = "gold4"), size = 3) +  # Puntos azuis
   geom_segment(aes(x = left, xend = right, y = rownames(Tukey), color = "slateblue"), size = 1) +  # Barras de intervalo suaves
-  geom_point(aes(x = left), shape = 21, size = 3, fill = "white", color = "slateblue2") +  # Puntos al final izquierdo
-  geom_point(aes(x = right), shape = 21, size = 3, fill = "white", color = "slateblue2") +  # Puntos al final derecho
+  geom_point(aes(x = left), shape = 21, size = 3, fill = "white", color = "slateblue2") +  # Puntos extremo esquerdo
+  geom_point(aes(x = right), shape = 21, size = 3, fill = "white", color = "slateblue2") +  # Puntos extremo dereito
   geom_text(aes(x = max(right) + 0.5, label = round(p.adjust,3)), hjust = 0, vjust = 0, size = 3) +  # Texto con p.adjust
   labs(
-    title = "Intervalos de Confianza Axustados por Tukey",
+    title = "Intervalos de confianza axustados por Tukey",
     x = "Estimación", 
     y = "Comparacións"
   ) +
   geom_vline(xintercept = 0, color = "black", linetype = "dashed", size = 0.15) +
   theme_minimal() +
-  theme(legend.position = "none" )  # Ajustamos las etiquetas del eje y y eliminamos la leyenda
-
-
-
+  theme(legend.position = "none" )  # Axustamos as etiquetas do eixo e eliminamos a lenda
 
 
 
@@ -346,3 +343,4 @@ anova(modAnovaRel) #si
 TukeyHSD(aov(modAnovaRel)) #Todas son iguais.
 
 step(modAnovaRel) #É mellor quedarse cun modelo sen desviacións por grupos.e
+
