@@ -298,12 +298,11 @@ rug(cooks.distance(mod1))
 par(mfrow = c(2, 2))
 plot(mod1)
 
-# 1.  Residuals vs Fitted. Este gráfico representa os residuos fronte aos valores axustados.
+#   1. Residuals vs Fitted. Este gráfico representa os residuos fronte aos valores axustados.
 #   É útil para identificar patróns nos residuos. Se o modelo é adecuado espérase que os
 #   residuos estean distribuídos aleatoriamente arredor de 0 sen patróns evidentes, que é
 #   o caso. Non se observan residuos que produzan efecto panca. Sinálanse as observacións
 #   115, 150 e 166.
-
 #  2.	Scale-Location. Este gráfico representa a raíz cadrada dos residuos estandarizados
 #   fronte os valores axustados. Permite avaliar se a variabilidade dos residuos é constante. 
 #   A hipótese de homocedasticidade non se ve moi comprometida: visualmente,
