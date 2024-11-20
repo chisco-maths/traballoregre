@@ -6,6 +6,8 @@
 # Variable Explicativa Continua log(PreHIV)
 # Variable Explicativa Continua log(Pop)
 
+#Analicemos o mellor modelo
+
 # ---------------------------------------------------------------------------------------
 
 #Apliquemos un modelo que combina o multiple e anova para facer o ancova
@@ -15,10 +17,6 @@
 #    a 10 observacións por grupo.
 # ---------------------------------------------------------------------------------------
 
-#  - Plantexamos o seguinte modelo ANCOVA:
-# ---------------------------------------------------------------------------------------
-# log(NewHIV)= mu(Reg_1) + alpha_i + (gamma_1+gamma_i)*log(PreHIV)+(delta_1+delta_i)*log(Pop) Erro
-# ---------------------------------------------------------------------------------------
 
 #Creamos un data.frame cos datos de interese
 base <- na.omit(read.csv("BBDDHIV.csv",sep=";"))
@@ -28,60 +26,111 @@ attach(data.Ancova)
 
 ggplot(data.Ancova, aes(x = AncovaPre, y = AncovaNew, colour = AncovaReg, shape = AncovaReg)) + 
   geom_point() +
-  ggtitle("Intervalos de confianza para todos os parámetros") +
+  ggtitle("Diagrama de dispersión de log(PreHIV) sobre log(NewHIV) por grupos de Reg") +
   theme_minimal()
 
-modAncovaReg <- lm(AncovaNew~(AncovaPre+AncovaPop)*AncovaReg)
-summary(modAncovaReg)
+modAncovaRegA <- lm(AncovaNew~(AncovaPre)*AncovaReg)
+summary(modAncovaRegA)
+step(modAncovaRegA)
 
-modAncovaRegfinal <- step(modAncovaReg)
-summary(modAncovaRegfinal) 
+modAncovaRegA2 <- lm(AncovaNew~AncovaPre+AncovaReg)
+summary(modAncovaRegA2)
+
+
+ggplot(data.Ancova, aes(x = AncovaPop, y = AncovaNew, colour = AncovaReg, shape = AncovaReg)) + 
+  geom_point() +
+  ggtitle("Diagrama de dispersión de log(PreHIV) sobre log(NewHIV) por grupos de Reg") +
+  theme_minimal()
+
+#Modelo con interacción
+modAncovaRegB <- lm(AncovaNew~(AncovaPop)*AncovaReg)
+summary(modAncovaRegB)
+#Modelo sen interacción
+modAncovaRegB2 <- lm(AncovaNew~AncovaPop+AncovaReg)
+summary(modAncovaRegB2)
+
+#Centrarémonos en estudar o modelo sobre AncovaPop
+
+#  - Plantexamos o seguinte modelo ANCOVA:
+# Ancova simple con interacción
+# ---------------------------------------------------------------------------------------
+# log(NewHIV)= mu(Reg_1) + alpha_i + (delta_1+delta_i)*log(Pop) + Erro
+# ---------------------------------------------------------------------------------------
+
+# Estimadores dos parámetros do modelo
+coeffancovaB <- coef(modAncovaRegB); coeffancovaB
+# Coeficientes para cada grupo
+
+ggplot(data.Ancova, aes(x = AncovaPop, y = AncovaNew, colour = AncovaReg,shape=AncovaReg)) +
+  geom_point(shape=AncovaReg) +  # Puntos reales
+  geom_abline(slope = coeffancovaB["AncovaPop"], intercept = coeffancovaB["(Intercept)"], color = "yellow", size = 1) + 
+  geom_abline(slope = coeffancovaB["AncovaPop"] + coeffancovaB["AncovaPop:AncovaRegAmericas"], intercept = coeffancovaB["(Intercept)"] + coeffancovaB["AncovaRegAmericas"], color = "red", size = 1) +  # Recta para el grupo "Americas" de AncovaReg
+  geom_abline(slope = coeffancovaB["AncovaPop"] + coeffancovaB["AncovaPop:AncovaRegEastern Mediterranean"], intercept = coeffancovaB["(Intercept)"] + coeffancovaB["AncovaRegEastern Mediterranean"], color = "purple", size = 1) +  # Recta para el grupo "Eastern Mediterranean" de AncovaReg
+  geom_abline(slope = coeffancovaB["AncovaPop"] + coeffancovaB["AncovaPop:AncovaRegEurope"], intercept = coeffancovaB["(Intercept)"] + coeffancovaB["AncovaRegEurope"], color = "green", size = 1) +  # Recta para el grupo "Europe" de AncovaReg
+  geom_abline(slope = coeffancovaB["AncovaPop"] + coeffancovaB["AncovaPop:AncovaRegSouth-East Asia"], intercept = coeffancovaB["(Intercept)"] + coeffancovaB["AncovaRegSouth-East Asia"], color = "blue", size = 1) +  # Recta para el grupo "South-East Asia" de AncovaReg
+  geom_abline(slope = coeffancovaB["AncovaPop"] + coeffancovaB["AncovaPop:AncovaRegWestern Pacific"], intercept = coeffancovaB["(Intercept)"] + coeffancovaB["AncovaRegWestern Pacific"], color = "orange", size = 1) +  # Recta para el grupo "Western Pacific" de AncovaReg
+  labs(title = "Modelo ANCOVA con Interacción", x = "AncovaPop", y = "AncovaNew",colour = "Región") +
+  scale_colour_manual(values = c(
+    "Americas" = "red",  
+    "Eastern Mediterranean" = "purple",  
+    "Europe" = "green",  
+    "South-East Asia" = "blue",  
+    "Western Pacific" = "orange",  
+    "Africa" = "yellow"  
+  )) +
+  theme_minimal()
+
+
+# Ancova simple sen interacción
+# ---------------------------------------------------------------------------------------
+# log(NewHIV)= mu(Reg_1) + alpha_i + (delta)*log(Pop) + Erro
+# ---------------------------------------------------------------------------------------
+
+# Estimadores dos parámetros do modelo
+coeffancovaB2 <- coef(modAncovaRegB2); coeffancovaB2
+# Coeficientes para cada grupo
+
+ggplot(data.Ancova, aes(x = AncovaPop, y = AncovaNew, colour = AncovaReg,shape=AncovaReg)) +
+  geom_point(shape=AncovaReg) +  # Puntos reales
+  geom_abline(slope = coeffancovaB2["AncovaPop"], intercept = coeffancovaB2["(Intercept)"], color = "yellow", size = 1) + 
+  geom_abline(slope = coeffancovaB2["AncovaPop"], intercept = coeffancovaB2["(Intercept)"] + coeffancovaB2["AncovaRegAmericas"], color = "red", size = 1) +  # Recta para el grupo "Americas" de AncovaReg
+  geom_abline(slope = coeffancovaB2["AncovaPop"], intercept = coeffancovaB2["(Intercept)"] + coeffancovaB2["AncovaRegEastern Mediterranean"], color = "purple", size = 1) +  # Recta para el grupo "Eastern Mediterranean" de AncovaReg
+  geom_abline(slope = coeffancovaB2["AncovaPop"], intercept = coeffancovaB2["(Intercept)"] + coeffancovaB2["AncovaRegEurope"], color = "green", size = 1) +  # Recta para el grupo "Europe" de AncovaReg
+  geom_abline(slope = coeffancovaB2["AncovaPop"], intercept = coeffancovaB2["(Intercept)"] + coeffancovaB2["AncovaRegSouth-East Asia"], color = "blue", size = 1) +  # Recta para el grupo "South-East Asia" de AncovaReg
+  geom_abline(slope = coeffancovaB2["AncovaPop"], intercept = coeffancovaB2["(Intercept)"] + coeffancovaB2["AncovaRegWestern Pacific"], color = "orange", size = 1) +  # Recta para el grupo "Western Pacific" de AncovaReg
+  labs(title = "Modelo ANCOVA con Interacción", x = "AncovaPop", y = "AncovaNew",colour = "Región") +
+  scale_colour_manual(values = c(
+    "Americas" = "red",  
+    "Eastern Mediterranean" = "purple",  
+    "Europe" = "green",  
+    "South-East Asia" = "blue",  
+    "Western Pacific" = "orange",  
+    "Africa" = "yellow"  
+  )) +
+  theme_minimal()
 par(mfrow=c(2,2))
-plot(modAncovaRegfinal) #Non hai influintes, non quitamos ningun
-
-library(dplyr)
-#install.packages("plotly")
-library(plotly)
-
-# Modelo sin interacción (asegúrate de que no haya términos de interacción)
-modAncovaRegfinal <- lm(AncovaNew ~ AncovaPre + AncovaPop + AncovaReg, data = data.Ancova)
-
-# Crear un grid para predicción
-grid_data <- expand.grid(
-  AncovaPre = seq(min(data.Ancova$AncovaPre), max(data.Ancova$AncovaPre), length.out = 50),
-  AncovaPop = seq(min(data.Ancova$AncovaPop), max(data.Ancova$AncovaPop), length.out = 50),
-  AncovaReg = levels(data.Ancova$AncovaReg)
-)
-
-# Agregar predicciones
-grid_data$Pred <- predict(modAncovaRegfinal, newdata = grid_data)
-
-# Graficar planos interactivos
-plot_ly() %>%
-  add_markers(data = data.Ancova, x = ~AncovaPre, y = ~AncovaPop, z = ~AncovaNew, color = ~AncovaReg,
-              marker = list(size = 3), name = "Datos originales") %>%
-  add_surface(x = unique(grid_data$AncovaPre), 
-              y = unique(grid_data$AncovaPop),
-              z = matrix(grid_data$Pred, nrow = 50, byrow = TRUE),
-              color = ~grid_data$AncovaReg, showscale = FALSE) %>%
-  layout(scene = list(
-    xaxis = list(title = "AncovaPre (log)"),
-    yaxis = list(title = "AncovaPop (log)"),
-    zaxis = list(title = "AncovaNew (log)")
-  ))
-
-plot_ly() %>%
-  add_markers(data = data.Ancova, x = ~AncovaPre, y = ~AncovaPop, z = ~AncovaNew, color = ~AncovaReg,
-              marker = list(size = 3), name = "Datos originales") %>%
-  add_trace(data = grid_data,
-            x = ~AncovaPre, y = ~AncovaPop, z = ~Pred, type = "scatter3d", mode = "lines",
-            line = list(width = 2), color = ~AncovaReg, name = "Planos ajustados") %>%
-  layout(scene = list(
-    xaxis = list(title = "AncovaPre (log)"),
-    yaxis = list(title = "AncovaPop (log)"),
-    zaxis = list(title = "AncovaNew (log)")
-  ))
 
 
-anova(aov(modAncovaRegfinal))
+
+#Contraste do efecto da interacción
+#Primeiro o modelo sinxelo, logo o complexo
+anova(modAncovaRegB2,modAncovaRegB) #0.8547 logo é preferible o modelo sen interacción
+#Desbotamos o modelo con interaccion
+
+#Contraste do efecto da variable continua
+modsencontinua <-lm(AncovaNew~AncovaReg)
+anova(modsencontinua,modAncovaRegB2) #2.2e-16 logo hai un efecto da variable continua
+#Estamos a comparar un modelo ancova cun modelo anova (sen continua)
+
+#Contraste do efecto da variable categorica
+modsencategorica <-lm(AncovaNew~AncovaPop)
+anova(modsencategorica,modAncovaRegB2) #2.2e-16 logo hai un efecto da variable categorica
+#Estamos a comparar un modelo ancova cun modelo lineal simple (sen categorica)
+
+
+plot(modAncovaRegB2) #Non hai influintes, non quitamos ningun
+
+#Interpretación do modelo final...
+
+#Validación
 
