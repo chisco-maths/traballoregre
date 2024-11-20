@@ -768,7 +768,7 @@ summary(modAnovaReg)
 #   desviacións da media de cada grupo respecto á de África.
 # - Todas as medias son positivas.
 # - A maior parte dos estimadores son significativamente distintos de 0. O que parece ter máis
-#   problemas é o asociado a Asia pero segue tendo un valor crítico significativo (0.02372).
+#   problemas é o asociado a Asia pero segue tendo un p-valor significativo (0.02372).
 
 #Nótese que a estimación da desviación é de 2.075 (relacionada coa suma da varianza intragrupal)
 
