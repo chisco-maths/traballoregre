@@ -1,23 +1,19 @@
 
 # ---------------------------------------------------------------------------------------
 # MODELO ANOVA. 
-# Variable Categórica Rexión (Reg).
-# ---------------------------------------------------------------------------------------
+# Variable categórica: rexión (Reg).
 
-# ---------------------------------------------------------------------------------------
-# Comentarios:
 #  - Temos un total de 6 grupos (6 valores da variable categórica Reg), cun número maior
 #    a 10 observacións por grupo.
-# ---------------------------------------------------------------------------------------
-
 #  - Plantexamos o seguinte modelo ANOVA:
-# ---------------------------------------------------------------------------------------
 # log(NewHIV)= mu(Reg_1) + alpha_i + Erro
-# ---------------------------------------------------------------------------------------
 
-#Creamos un data.frame cos datos de interese
+
+# Creamos un data frame cos datos de interese
 base <- na.omit(read.csv("BBDDHIV.csv",sep=";"))
 dataReg=data.frame(CouCod=base$CouCod,AnovaReg=factor(base$Reg),AnovaNew=log(base$NewHIV))
+
+
 par(mfrow=c(1,1))
 plot(dataReg$AnovaReg, dataReg$AnovaNew, main = "Identificación de Atípicos", 
      xlab = "AnovaReg", ylab = "AnovaNew")
@@ -35,7 +31,7 @@ atipico <- function(x) {
   return(x < quantile(x, .25) - 1.5*IQR(x) | x > quantile(x, .75) + 1.5*IQR(x))
 }
 
-#orixinamos unha columna indicando cales son as observacións atípicas
+# Orixinamos unha columna indicando cales son as observacións atípicas
 dataReg <- dataReg %>%
   group_by(AnovaReg) %>%
   mutate(outlier = ifelse(atipico(AnovaNew), CouCod, NA))
