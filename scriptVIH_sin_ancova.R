@@ -798,7 +798,7 @@ normalidad_residuos <- dataAnova %>%
 print(normalidad_residuos)
 
 # - Observamos que a un nivel de 0.05 o grupo de Europa non cómpre
-# a hipótese de normalidade dos residuos.
+#   a hipótese de normalidade dos residuos.
 
 # Test de Shapiro-Wilk para os datos
 resultado_shapiro <- shapiro.test(dataAnova$AnovaNew)
