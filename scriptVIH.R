@@ -1,16 +1,7 @@
-###--------#--------#--------#--------#--------#--------#--------#--------#--------###
-###--------#-------MODELOS--DE--REGRESIÓN--E--ANÁLISE--MULTIVARIANTE------#--------###
-###--------#--------#--------#--------#--------#--------#--------#--------#--------###
-###--------#--------#------TAREFA--DE--AVALIACIÓN--CONTINUA------#--------#--------###
-###--------#--------#-------------------SCRIPT-------------------#--------#--------###
-###--------#--------#--------------------------------------------#--------#--------###
-###--------#--------#----------CHENLO--ANDRADE--NICOLÁS----------#--------#--------###
-###--------#--------#---------ESTÉVEZ--LENGUA--FRANCISCO---------#--------#--------###
-
-### Modelos de Regresión e Análise Multivariante
-### Tarefa de evaluación continua
-### Chenlo Andrade, Nicolás
-### Estévez Lengua, Francisco
+### Modelos de Regresión e Análise Multivariante.
+### Tarefa de evaluación continua.
+### Chenlo Andrade, Nicolás,
+### Estévez Lengua, Francisco.
 
 # Instalamos diversos paquetes de representación gráfica
 #install.packages(c("gridExtra","ggcorrplot","ggplot2"))
@@ -819,7 +810,7 @@ ggplot(dataAnova, aes(x = AnovaReg, y = AnovaNew, colour = AnovaReg, shape = Ano
   geom_text(aes(label=outlier), na.rm=TRUE, hjust=-.5)+
   theme(legend.position="none")
 
-# Definimos o modelo anova
+# Definimos o modelo ANOVA
 modAnovaReg2<- lm(AnovaNew ~ AnovaReg)
 
 # Visualizamos a información básica do modelo
@@ -834,7 +825,7 @@ anova(modAnovaReg2) # 0.0005975
 
 # Repetimos a validación do modelo
 
-# Definimos unha serie de obxectos que usaremos nesta sección e reescribimos variables
+# Definimos unha serie de obxectos que usaremos nesta sección
 nReg=length(AnovaReg) # Tamaño da mostra
 IReg=length(levels(AnovaReg)) # Cantidade de grupos
 names=levels(AnovaReg) # Nomes dos grupos
@@ -851,28 +842,26 @@ normalidad_residuos <- dataAnova %>%
   summarise(p_value = shapiro.test(residuo)$p.value, .groups = "drop")
 print(normalidad_residuos)
 
-# Test de Shapiro-Wilk para os residuos en xeral
+# Test de Shapiro-Wilk para os residuos
 resultado_shapiro <- shapiro.test(residuals(modAnovaReg2))
 print(resultado_shapiro)
 
 
-# Homoxeneidade.
+# Homoxeneidade
 
 # Test de Levene
 residuosabs=abs(residuals(modAnovaReg2))
 levene=lm(residuosabs~AnovaReg)
-anova(levene)
+anova(levene) # 0.009898.
 
-# Nivel crítico: 0.009898. Este valor é menor que 0.05, o que suxire que rexeitamos a 
-# hipótese nula de que as varianzas son homogéneas entre los grupos.	
-# Interpretación: As varianzas entre os grupos son significativamente diferentes, 
-# o que indica unha violación da hipótese de homoxeneidade de varianzas.
-#MIRAR SI ESTO ESTÁ BIEN O MAL INTERPRETADO POR EL PVALOR
+# - Como o p-valor é moi significativo, rexeitamos a hipótese nula de homoxeneidade de
+#   varianzas entre os grupos.
 
 
 # Comparacións múltiples
 
-# Método de Bonferroni
+# Método de Bonferroni a modo de práctica. Non ten sentido estatístico xa que non se cómpre
+# homoxeneidade de varianzas.
 
 # Cálculo dos intervalos de confianza
 ni=n_localReg
@@ -917,7 +906,8 @@ ggplot(Bonferroni, aes(y = rownames(Bonferroni), x = center,xmax=max(right)+1)) 
   theme_minimal() +
   theme(legend.position = "none" )  # Axustamos as etiquetas do eixo e eliminamos a lenda
 
-# Método de Tukey
+# Método de Tukey a modo de práctica. Non ten sentido estatístico xa que non se cómpre
+# homoxeneidade de varianzas.
 
 # Cálculo dos intervalos de confianza
 TukeyHSD(aov(modAnovaReg))
@@ -962,59 +952,65 @@ ggplot(Tukey, aes(y = rownames(Tukey), x = center,xmax=max(right)+1)) +
 ### Sección 3: modelo ANCOVA
 
 
-# ---------------------------------------------------------------------------------------
-# Posibles variables de construción.
-# Variable Resposta Continua log(NewHIV)
-# Variable Explicativa Categórica Rexión (Reg)
-# Variable Explicativa Continua log(PreHIV)
-# Variable Explicativa Continua log(Pop)
+# Posibles variables de construción:
+# Variable resposta continua log(NewHIV)
+# Variable explicativa categórica Rexión (Reg)
+# Variable explicativa continua log(PreHIV)
+# Variable explicativa continua log(Pop)
 
 
-#Creamos un data.frame cos datos de interese
+# Creamos un data frame cos datos de interese
 dataAncova=data.frame(CouCod=base$CouCod,AncovaReg=factor(base$Reg),AncovaNew=log(base$NewHIV),AncovaPre=log(base$PreHIV),AncovaPop=log(base$Pop))
 attach(dataAncova)
 
-#Plantexamos un modelo de log(PreHIV) sobre log(NewHIV) por grupos de Reg
+
+# Modelo de log(PreHIV) sobre log(NewHIV) por grupos de Reg
+
+# Representación gráfica
 ggplot(dataAncova, aes(x = AncovaPre, y = AncovaNew, colour = AncovaReg, shape = AncovaReg)) + 
   geom_point() +
   ggtitle("Diagrama de dispersión de log(PreHIV) sobre log(NewHIV) por grupos de Reg") +
   theme_minimal()
 
-#Modelo con interacción
+# Modelo con interacción
 modAncovaRegA <- lm(AncovaNew~(AncovaPre)*AncovaReg)
 summary(modAncovaRegA)
 step(modAncovaRegA)
 
-#Modelo sen interacción
+# Modelo sen interacción
 modAncovaRegA2 <- lm(AncovaNew~AncovaPre+AncovaReg)
 summary(modAncovaRegA2)
 
-#Plantexamos un modelo de log(Pop) sobre log(NewHIV) por grupos de Reg
+
+# Modelo de log(Pop) sobre log(NewHIV) por grupos de Reg
+
+# Representación gráfica
 ggplot(dataAncova, aes(x = AncovaPop, y = AncovaNew, colour = AncovaReg, shape = AncovaReg)) + 
   geom_point() +
   ggtitle("Diagrama de dispersión de log(Pop) sobre log(NewHIV) por grupos de Reg") +
   theme_minimal()
 
-#Modelo con interacción
+# Modelo con interacción
 modAncovaRegB <- lm(AncovaNew~(AncovaPop)*AncovaReg)
 summary(modAncovaRegB)
-#Modelo sen interacción
+
+# Modelo sen interacción
 modAncovaRegB2 <- lm(AncovaNew~AncovaPop+AncovaReg)
 summary(modAncovaRegB2)
 
 
-#Centrarémonos en estudar o modelo sobre AncovaPop
+# - Centrarémonos no modelo sobre AncovaPop
 
-#  - Plantexamos o seguinte modelo ANCOVA:
+# Plantexamos o seguinte modelo ANCOVA:
+
 # Ancova simple con interacción (modAncovaRegB)
-# ---------------------------------------------------------------------------------------
 # log(NewHIV)= mu(Reg_1) + alpha_i + (delta_1+delta_i)*log(Pop) + Erro
-# ---------------------------------------------------------------------------------------
+
 
 # Estimadores dos parámetros do modelo
 coeffancovaB <- coef(modAncovaRegB); coeffancovaB
-# Coeficientes para cada grupo
 
+# Representación dos coeficientes
 ggplot(dataAncova, aes(x = AncovaPop, y = AncovaNew, colour = AncovaReg,shape=AncovaReg)) +
   geom_point(shape=AncovaReg) +  # Puntos reales
   geom_abline(slope = coeffancovaB["AncovaPop"], intercept = coeffancovaB["(Intercept)"], color = "yellow", size = 1) + 
@@ -1036,14 +1032,12 @@ ggplot(dataAncova, aes(x = AncovaPop, y = AncovaNew, colour = AncovaReg,shape=An
 
 
 # Ancova simple sen interacción (modAncovaRegB2)
-# ---------------------------------------------------------------------------------------
 # log(NewHIV)= mu(Reg_1) + alpha_i + (delta)*log(Pop) + Erro
-# ---------------------------------------------------------------------------------------
 
 # Estimadores dos parámetros do modelo
 coeffancovaB2 <- coef(modAncovaRegB2); coeffancovaB2
-# interpretación dos parámetros
 
+# Representación dos coeficientes
 ggplot(dataAncova, aes(x = AncovaPop, y = AncovaNew, colour = AncovaReg,shape=AncovaReg)) +
   geom_point(shape=AncovaReg) +  # Puntos reales
   geom_abline(slope = coeffancovaB2["AncovaPop"], intercept = coeffancovaB2["(Intercept)"], color = "yellow", size = 1) + 
@@ -1067,38 +1061,46 @@ ggplot(dataAncova, aes(x = AncovaPop, y = AncovaNew, colour = AncovaReg,shape=An
 # Contrastes dos efectos
 
 # Contraste do efecto da interacción
-# Primeiro o modelo sinxelo, logo o complexo
-anova(modAncovaRegB2,modAncovaRegB) #0.8547 logo é preferible o modelo sen interacción
-#Desbotamos o modelo con interaccion
+anova(modAncovaRegB2,modAncovaRegB) # 0.8547
+
+# - Como o p-valor é elevado, non temos suficiente evidencia para preferir o modelo con
+#   interacción, logo quedámonos co modelo sen interacción.
 
 # Contraste do efecto da variable continua
 modsencontinua <-lm(AncovaNew~AncovaReg)
-anova(modsencontinua,modAncovaRegB2) #2.2e-16 logo hai un efecto da variable continua
-# Estamos a comparar un modelo ancova cun modelo anova (sen continua)
+anova(modsencontinua,modAncovaRegB2) # 2.2e-16
 
-# Contraste do efecto da variable categorica
+# - Como o p-valor é moi significativo, consideramos que o efecto da variable continua
+#   non é despreciable.
+# - Estamos a comparar un modelo ANCOVA cun modelo ANOVA (sen continua).
+
+# Contraste do efecto da variable categórica
 modsencategorica <-lm(AncovaNew~AncovaPop)
-anova(modsencategorica,modAncovaRegB2) #2.2e-16 logo hai un efecto da variable categorica
-# Estamos a comparar un modelo ancova cun modelo lineal simple (sen categorica)
+anova(modsencategorica,modAncovaRegB2) # 2.2e-16
+
+# - Como o p-valor é moi significativo, consideramos que o efecto da variable categórica
+#   non é despreciable.
+# - Estamos a comparar un modelo ANCOVA cun modelo lineal simple (sen categórica).
 
 
-#Analicemos en profundidade o modelo final: modAncovaRegB2
-#Intervalos de confianza para os parámetros
+# Analizamos o modelo log(NewHIV)= mu(Reg_1) + alpha_i + (delta)*log(Pop) + Erro
+
+# Intervalos de confianza para os parámetros
 confint(modAncovaRegB2)
 
-#Contrastes de significación dos parámetros
+# Contrastes de significación dos parámetros
 summary(modAncovaRegB2)
 
-#Varianza do modelo
+# Varianza do modelo
 
 
-#Diagnose e Validación
+# Diagnose
 par(mfrow=c(2,2))
-plot(modAncovaRegB2) #Non hai influintes, non quitamos ningun.
+plot(modAncovaRegB2)
 
+# - Non hai observacións influíntes logo non eliminamos nada.
 
-
-#Validación
+# Validación
 valAncova.df=data.frame(Reg=levels(AncovaReg),shapiro=c(1),bp=c(1),hmc=c(1),reset=c(1),harv=c(1))
 
 yAfr <- dataAncova[AncovaReg=="Africa",]$AncovaNew
@@ -1172,3 +1174,4 @@ valAncova.df[6,6] <- harvtest(modWes)$p.value
 
 
 #Interpretación do modelo final...
+
