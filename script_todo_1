@@ -54,7 +54,7 @@ attach(base)
 # ---------------------------------------------------------------------------------------
 
 
-### Capítulo 1: modelo múltiple.
+### Sección 1: modelo múltiple.
 
 
 # Propomos o seguinte modelo (mod0):
@@ -574,7 +574,7 @@ plot(mod2)
 #    igual ca no modelo anterior, nótese que agora maís se alonxan da orixe.
 # 4. Residuals vs Leverage. Como xa viramos, non se observan observacións influíntes.
 #    Sinálanse as observacións 75, 137, e 150
- 
+
 
 # Normalidade (Nor.Val.mod2)
 
