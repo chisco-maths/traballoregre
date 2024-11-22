@@ -149,7 +149,7 @@ beta_hat
 #   3. Os erros típicos non son excesivamente altos.
 # - A estimación da desviación típica vale 0.7429.
 # - Podemos tomar un nivel de significación maior que 0.00314 para facer inferencia, en base
-#   a que o nivel crítico máis alto é 0.00314.
+#   a que o p-valor máis alto é 0.00314.
 # - Dos estimadores dos parámetros deducimos a seguinte expresión:
 #   log(NewHIV) = -4.68712 + 0.26564*log(PreHIV) + 0.47702*log(TotHIV) + 0.45011*log(Pop).
 # - O intercepto é negativo. A interpretación literal é que se todas as variables
@@ -326,7 +326,7 @@ plot(mod1)
 shapiro.test(rstandard(mod1)) # 0.0008011
 shapiro.test(rstudent(mod1)) # 0.000274
 
-# - Debido ao baixo nivel crítico debemos rexeitar a normalidade do modelo proposto.
+# - Como o p-valor é moi baixo, rexeitamos a normalidade do modelo proposto.
 
 # Representación gráfica
 par(mfrow = c(1,2))
@@ -340,12 +340,12 @@ qqPlot(rstandard(mod1),main="Q-Q Plot")
 
 # Test de Breusch-Pagan
 bptest(mod1) # 0.07627
-# - Debido ao relativamente baixo nivel crítico, pero maior de 0.05, podemos
+# - O p-valor é baixo pero maior de 0.05, logo podemos
 # non rexeitar a hipótese de homocedasticidade do modelo proposto.
 
 # Test de Harrison-McCabe
 hmctest(mod1)
-# - Debido ao baixo nivel crítico poderiamos rexeitar a hipótese de homocedasticidade
+# - Debido ao baixo p-valor poderiamos rexeitar a hipótese de homocedasticidade
 #   do modelo proposto. 
 
 # En conclusión, non queda claro se rexeitamos ou non a homocedasticidade.
@@ -357,13 +357,13 @@ hmctest(mod1)
 # Test de Ramsey
 resettest(mod1) #0.3018
 
-# - O nivel crítico é alto, logo non rexeitamos a hipótese de linealidade do modelo.
+# - O p-valor é alto, logo non rexeitamos a hipótese de linealidade do modelo.
 #   Segundo este contraste non é mellor un polinomio de grao 2 ou 3.
 
 # Test de Harvey-Collier
 harvtest(mod1) #0.5636
 
-# - O nivel crítico é alto, o que nos leva a non rexeitar a hipótese nula 
+# - O p-valor é alto, o que nos leva a non rexeitar a hipótese nula 
 #   de que o modelo proposto é lineal (é coherente co resultado anterior).
 #   Segundo este test non aceptamos un comportamento convexo ou cóncavo.
 
@@ -578,7 +578,8 @@ plot(mod2)
 shapiro.test(residuals(mod2)) # 0.006246
 shapiro.test(rstandard(mod2)) # 0.006058
 shapiro.test(rstudent(mod2)) # 0.003103
-# - Debido ao baixo nivel crítico debemos rexeitar a normalidade do modelo proposto.
+
+# - Debido ao baixo p-valor debemos rexeitar a normalidade do modelo proposto.
 
 par(mfrow = c(1,2))
 hist(rstandard(mod2),freq=F,main="Histograma") 
@@ -593,13 +594,13 @@ qqPlot(rstandard(mod2),main="Q-Q plot")
 # Test de Breusch-Pagan
 bptest(mod2) # 0.0766
 
-# - Debido ao relativamente baixo nivel crítico, pero maior de 0.05, podemos
+# - O p-valor é baixo pero maior de 0.05, logo podemos
 # non rexeitar a hipótese de homocedasticidade do modelo proposto.
 
 # Test de Harrison-McCabe
 hmctest(mod2) # valor variable entre 0.34-0.2
 
-# - Debido ao baixo nivel crítico poderiamos rexeitar a hipótese de homocedasticidade
+# - Debido ao baixo p-valor poderiamos rexeitar a hipótese de homocedasticidade
 #   do modelo proposto. 
 
 # En conclusión, non queda claro se rexeitamos ou non a homocedasticidade.
@@ -611,13 +612,13 @@ hmctest(mod2) # valor variable entre 0.34-0.2
 # Test de Ramsey
 resettest(mod2) # 0.6715
 
-# - O nivel crítico é alto, logo non rexeitamos a hipótese de linealidade do modelo.
+# - O p-valor é alto, logo non rexeitamos a hipótese de linealidade do modelo.
 #   Segundo este contraste non é mellor un polinomio de grao 2 ou 3.
 
 # Test de Harvey-Collier
 harvtest(mod2) # 0.0003043
 
-# - Como o nivel crítico é moi baixo, poderia avisarnos de que o noso modelo ten
+# - Como o p-valor é moi baixo, poderia avisarnos de que o noso modelo ten
 #   tendencias cóncavas ou convexas, analizando o QQplot anterior pódese apreciar isto.
 
 # Test de sm.regression
