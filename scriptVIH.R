@@ -1209,4 +1209,3 @@ valAncova.df[6,6] <- harvtest(modWes)$p.value
 print(valAncova.df)
 
 #END
-
