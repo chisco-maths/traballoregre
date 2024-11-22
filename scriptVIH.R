@@ -371,7 +371,7 @@ harvtest(mod1) #0.5636
 sm.regression(log(NewHIV),rstandard(mod1),model="linear")
 
 
-# Análise da colinealidade (Col.Dia.Mod1)
+# Análise da correlación (Cor.Dia.Mod1)
 
 data_matrix <- cbind(log(NewHIV),log(PreHIV),log(TotHIV),log(Pop))
 colnames(data_matrix) <- c("log(NewHIV)","log(PreHIV)","log(TotHIV)","log(Pop)")
@@ -668,6 +668,50 @@ VIF_2
 
 
 ### Sección 2: modelo ANOVA.
+
+# Variable categórica: relixión (Rel).
+# ---------------------------------------------------------------------------------------
+dataRel=data.frame(CouCod=base$CouCod,AnovaRel=factor(base$Rel),AnovaNew=log(base$NewHIV))
+attach(dataRel)
+table(dataRel$AnovaRel)
+levels(dataRel$AnovaRel)[levels(dataRel$AnovaRel) %in% c("Buddhism", "Shinto / Buddhism")] <- "Buddhism"
+levels(dataRel$AnovaRel)[levels(dataRel$AnovaRel) %in% c("Christianity / Islam", "Christianity")] <- "Christianity"
+dataRel=dataRel[!(dataRel$AnovaRel%in% c("Hinduism",  "None (51%)" ,"Judaism" )),]
+dataRel$AnovaRel <- droplevels(dataRel$AnovaRel )
+table(dataRel$AnovaRel)
+
+# Orixinamos unha columna indicando cales son as observacións atípicas
+dataRel <- dataRel %>% group_by(AnovaRel) %>% mutate(outlier = ifelse(atipico(AnovaNew), CouCod, NA))
+
+#gráfico ilustrativo e identificativo
+ggplot(dataRel, aes(x = AnovaRel, y = AnovaNew, colour = AnovaRel, shape = AnovaRel)) + 
+  geom_boxplot(outlier.shape = NA) + geom_jitter() +
+  geom_text(aes(label=outlier), na.rm=TRUE, hjust=-.5) + theme(legend.position="none")
+
+#novo data.frame de datos
+dataRel2 <- dataRel %>% filter(is.na(outlier))
+#filtramos atípicos
+dataRel2 <- dataRel2 %>% group_by(AnovaRel) %>% mutate(outlier = ifelse(atipico(AnovaNew), CouCod, NA))
+
+#representamos os datos, vemos que volve a haber un atípico.
+ggplot(dataRel2, aes(x = AnovaRel, y = AnovaNew, colour = AnovaRel, shape = AnovaRel)) + 
+  geom_boxplot(outlier.shape = NA) + geom_jitter() +
+  geom_text(aes(label=outlier), na.rm=TRUE, hjust=-.5)+ theme(legend.position="none")
+
+#Modelo ANOVA
+modAnovaRel=lm(dataRel2$AnovaNew ~ dataRel2$AnovaRel)
+summary(modAnovaRel)
+
+anova(modAnovaRel) #si
+TukeyHSD(aov(modAnovaRel)) #Todas son iguais.
+
+step(modAnovaRel) #É mellor quedarse cun modelo sen desviacións por grupos
+
+
+
+
+
+
 
 
 # Variable categórica: rexión (Reg).
@@ -1170,4 +1214,9 @@ valAncova.df[6,6] <- harvtest(modWes)$p.value
 
 print(valAncova.df)
 
+
+
+
+
+#Interpretación do modelo final...
 
