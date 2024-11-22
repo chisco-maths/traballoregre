@@ -340,16 +340,14 @@ qqPlot(rstandard(mod1),main="Q-Q Plot")
 
 # Test de Breusch-Pagan
 bptest(mod1) # 0.07627
-# - O p-valor é baixo pero maior de 0.05, logo podemos
+# - O p-valor é baixo pero maior de 0.05, logo poderíamos
 # non rexeitar a hipótese de homocedasticidade do modelo proposto.
 
 # Test de Harrison-McCabe
-hmctest(mod1)
-# - Debido ao baixo p-valor poderiamos rexeitar a hipótese de homocedasticidade
-#   do modelo proposto. 
+hmctest(mod1) # 0.028
 
-# En conclusión, non queda claro se rexeitamos ou non a homocedasticidade.
-# En base ao Test de Breusch-Pagan e aos gráficos, non a rexeitamos.
+# - Debido ao baixo p-valor decidimos rexeitar a hipótese de homocedasticidade
+#   do modelo proposto. 
 
 
 # Linealidade (Lin.Val.Mod1)
