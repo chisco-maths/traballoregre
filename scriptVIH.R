@@ -219,7 +219,7 @@ leverages1 <- hat(model.matrix(mod1))
 n1 <- length(log(NewHIV))
 p1 <- 4 
 indlev1 <- which(leverages1 >= 2*p1/n1)
-length(indlev1) # 19
+length(indlev1) # Temos un total de 19 observacións
 
 # Representamos graficamente as observacións con capacidade de influencia nos
 # diagramas de dispersión de cada variable explicativa.
@@ -464,8 +464,8 @@ colnames(confint_df_2) <- c("lower", "upper", "Confianza")
 # Engadimos as columnas do parámetro estimado e o valor central (media)
 confint_df_2$parametro <- rownames(confint_99_2)
 confint_df_2$media <- (confint_df_2$lower + confint_df_2$upper) / 2
-rm(confint_99_2,confint_95_2,confint_99_2)
-rm(confint_df_99_2,confint_df_95_2,confint_99_2)
+rm(confint_99_2,confint_95_2,confint_90_2)
+rm(confint_df_99_2,confint_df_95_2,confint_df_90_2)
 
 
 # Creamos un gráfico con ggplot que amose na mesma escala os intervalos
@@ -597,7 +597,7 @@ bptest(mod2) # 0.0766
 # non rexeitar a hipótese de homocedasticidade do modelo proposto.
 
 # Test de Harrison-McCabe
-hmctest(mod2) # valor variable entre 0.32-0.2
+hmctest(mod2) # valor variable entre 0.34-0.2
 
 # - Debido ao baixo nivel crítico poderiamos rexeitar a hipótese de homocedasticidade
 #   do modelo proposto. 
@@ -707,8 +707,6 @@ ggplot(dataReg, aes(x = AnovaReg, y = AnovaNew, colour = AnovaReg, shape = Anova
   geom_text(aes(label=outlier), na.rm=TRUE, hjust=-.5)+
   theme(legend.position="none")
 
-# https://www.r-bloggers.com/2022/08/how-to-label-outliers-in-boxplots-in-ggplot2/
-
 # Definimos un novo data frame eliminando os atípicos
 dataReg2 <- dataReg %>% filter(is.na(outlier))
 
@@ -745,7 +743,7 @@ ggplot(dataReg3, aes(x = AnovaReg, y = AnovaNew, colour = AnovaReg, shape = Anov
 # Centrarémonos unicamente no data frame dataReg3, que renomearemos dataAnova por claridade.
 dataAnova=dataReg3
 rm(dataReg,dataReg2,dataReg3) #eliminamos
-attach(dataAnova) #solamos nomes, pero queda o máis recente
+attach(dataAnova) #solapamos nomes, pero queda o máis recente
 
 # Definimos o modelo anova
 modAnovaReg<- lm(AnovaNew ~ AnovaReg)
@@ -815,6 +813,9 @@ modAnovaReg2<- lm(AnovaNew ~ AnovaReg)
 
 # Visualizamos a información básica do modelo
 summary(modAnovaReg2)
+
+# Intervalos de confianza para os estimadores dos parámetros
+confint(modAnovaReg2)
 
 # - As conclusións son practicamente idénticas ás do modelo anterior.
 
@@ -1091,8 +1092,6 @@ confint(modAncovaRegB2)
 # Contrastes de significación dos parámetros
 summary(modAncovaRegB2)
 
-# Varianza do modelo
-
 
 # Diagnose
 par(mfrow=c(2,2))
@@ -1169,9 +1168,6 @@ valAncova.df[6,4] <- hmctest(modWes)$p.value
 valAncova.df[6,5] <- resettest(modWes)$p.value
 valAncova.df[6,6] <- harvtest(modWes)$p.value
 
+print(valAncova.df)
 
-
-
-
-#Interpretación do modelo final...
 
