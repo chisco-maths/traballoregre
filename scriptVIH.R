@@ -709,11 +709,6 @@ step(modAnovaRel) #É mellor quedarse cun modelo sen desviacións por grupos
 
 
 
-
-
-
-
-
 # Variable categórica: rexión (Reg).
 # - Temos un total de 6 grupos (6 valores da variable categórica Reg), cun número maior
 #   a 10 observacións por grupo.
@@ -1214,9 +1209,4 @@ valAncova.df[6,6] <- harvtest(modWes)$p.value
 
 print(valAncova.df)
 
-
-
-
-
-#Interpretación do modelo final...
-
+#END
